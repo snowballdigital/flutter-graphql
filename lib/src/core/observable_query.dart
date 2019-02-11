@@ -2,11 +2,11 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'package:graphql_flutter/src/core/query_manager.dart';
-import 'package:graphql_flutter/src/core/query_options.dart';
-import 'package:graphql_flutter/src/core/query_result.dart';
+import 'package:flutter_graphql/src/core/query_manager.dart';
+import 'package:flutter_graphql/src/core/query_options.dart';
+import 'package:flutter_graphql/src/core/query_result.dart';
 
-import 'package:graphql_flutter/src/scheduler/scheduler.dart';
+import 'package:flutter_graphql/src/scheduler/scheduler.dart';
 
 class ObservableQuery {
   final String queryId;

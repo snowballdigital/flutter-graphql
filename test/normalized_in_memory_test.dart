@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
+import 'package:flutter_graphql/src/cache/normalized_in_memory.dart';
 
 List<String> reference(String key) {
   return <String>['cache/reference', key];

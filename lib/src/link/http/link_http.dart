@@ -5,11 +5,11 @@ import 'package:meta/meta.dart';
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
 
-import 'package:graphql_flutter/src/link/link.dart';
-import 'package:graphql_flutter/src/link/operation.dart';
-import 'package:graphql_flutter/src/link/fetch_result.dart';
-import 'package:graphql_flutter/src/link/http/http_config.dart';
-import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
+import 'package:flutter_graphql/src/link/link.dart';
+import 'package:flutter_graphql/src/link/operation.dart';
+import 'package:flutter_graphql/src/link/fetch_result.dart';
+import 'package:flutter_graphql/src/link/http/http_config.dart';
+import 'package:flutter_graphql/src/link/http/fallback_http_config.dart';
 
 class HttpLink extends Link {
   HttpLink({

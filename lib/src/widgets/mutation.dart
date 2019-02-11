@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import 'package:graphql_flutter/src/graphql_client.dart';
-import 'package:graphql_flutter/src/core/observable_query.dart';
-import 'package:graphql_flutter/src/core/query_options.dart';
-import 'package:graphql_flutter/src/core/query_result.dart';
+import 'package:flutter_graphql/src/graphql_client.dart';
+import 'package:flutter_graphql/src/core/observable_query.dart';
+import 'package:flutter_graphql/src/core/query_options.dart';
+import 'package:flutter_graphql/src/core/query_result.dart';
 
-import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
+import 'package:flutter_graphql/src/widgets/graphql_provider.dart';
 
 typedef RunMutation = void Function(Map<String, dynamic> variables);
 typedef MutationBuilder = Widget Function(

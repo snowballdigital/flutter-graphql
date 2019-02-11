@@ -1,4 +1,4 @@
-import 'package:graphql_flutter/src/core/graphql_error.dart';
+import 'package:flutter_graphql/src/core/graphql_error.dart';
 
 class QueryResult {
   /// List<dynamic> or Map<String, dynamic>

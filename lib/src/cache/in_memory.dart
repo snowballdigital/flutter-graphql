@@ -5,7 +5,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
-import 'package:graphql_flutter/src/cache/cache.dart';
+import 'package:flutter_graphql/src/cache/cache.dart';
 
 class InMemoryCache implements Cache {
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();

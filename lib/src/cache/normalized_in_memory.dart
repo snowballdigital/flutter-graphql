@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
-import 'package:graphql_flutter/src/utilities/traverse.dart';
-import 'package:graphql_flutter/src/cache/in_memory.dart';
+import 'package:flutter_graphql/src/utilities/traverse.dart';
+import 'package:flutter_graphql/src/cache/in_memory.dart';
 
 typedef String DataIdFromObject(Object node);
 

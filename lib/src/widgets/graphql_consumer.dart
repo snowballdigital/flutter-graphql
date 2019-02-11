@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-import 'package:graphql_flutter/src/graphql_client.dart';
-import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
+import 'package:flutter_graphql/src/graphql_client.dart';
+import 'package:flutter_graphql/src/widgets/graphql_provider.dart';
 
 typedef Widget GraphQLConsumerBuilder(GraphQLClient client);
 

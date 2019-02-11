@@ -2,20 +2,20 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'package:graphql_flutter/src/core/query_options.dart';
-import 'package:graphql_flutter/src/core/query_result.dart';
-import 'package:graphql_flutter/src/core/graphql_error.dart';
-import 'package:graphql_flutter/src/core/observable_query.dart';
+import 'package:flutter_graphql/src/core/query_options.dart';
+import 'package:flutter_graphql/src/core/query_result.dart';
+import 'package:flutter_graphql/src/core/graphql_error.dart';
+import 'package:flutter_graphql/src/core/observable_query.dart';
 
-import 'package:graphql_flutter/src/scheduler/scheduler.dart';
+import 'package:flutter_graphql/src/scheduler/scheduler.dart';
 
-import 'package:graphql_flutter/src/link/link.dart';
-import 'package:graphql_flutter/src/link/operation.dart';
-import 'package:graphql_flutter/src/link/fetch_result.dart';
+import 'package:flutter_graphql/src/link/link.dart';
+import 'package:flutter_graphql/src/link/operation.dart';
+import 'package:flutter_graphql/src/link/fetch_result.dart';
 
-import 'package:graphql_flutter/src/cache/cache.dart';
+import 'package:flutter_graphql/src/cache/cache.dart';
 
-import 'package:graphql_flutter/src/utilities/get_from_ast.dart';
+import 'package:flutter_graphql/src/utilities/get_from_ast.dart';
 
 class QueryManager {
   final Link link;

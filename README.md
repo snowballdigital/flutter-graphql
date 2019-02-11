@@ -14,7 +14,6 @@
   - [Table of Contents](#table-of-contents)
   - [About this project](#about-this-project)
   - [Installation](#installation)
-  - [Upgrading from 0.x.x](#upgrading-from-0xx)
   - [Usage](#usage)
     - [GraphQL Provider](#graphql-provider)
     - [Offline Cache](#offline-cache)
@@ -25,7 +24,8 @@
     - [Graphql Consumer](#graphql-consumer)
   - [Roadmap](#roadmap)
   - [Contributing](#contributing)
-  - [Contributors](#contributors)
+  - [New Contributors](#new-contributors)
+  - [Base Contributors](#base-contributors)
 
 ## About this project
 
@@ -41,120 +41,14 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^1.0.0-alpha
+  flutter_graphql: ^1.0.0-alpha
 ```
 
 Now inside your Dart code you can import it.
 
 ```dart
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:flutter_graphql/flutter_graphql.dart';
 ```
-
-## Upgrading from 0.x.x
-
-Here is a guide to fix most of the breaking changes introduced in 1.x.x.
-
-Some class names have been renamed:
-
-- Renamed `Client` to `GraphQLClient`
-- Renamed `GraphqlProvider` to `GraphQLProvider`
-- Renamed `GraphqlConsumer` to `GraphQLConsumer`
-- Renamed `GQLError` to `GraphQLError`
-
-We changed the way the client handles requests, it now uses a `Link` to execute queries rather then depend on the http package. We've currently only implplemented the `HttpLink`, just drop it in like so:
-
-```diff
-void main() {
-+  HttpLink link = HttpLink(
-+    uri: 'https://api.github.com/graphql',
-+    headers: <String, String>{
-+      'Authorization': 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
-+    },
-+  );
-
--  ValueNotifier<Client> client = ValueNotifier(
-+  ValueNotifier<GraphQLClient> client = ValueNotifier(
--  Client(
--    endPoint: 'https://api.github.com/graphql',
-+  GraphQLClient(
-      cache: InMemoryCache(),
--      apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
-+      link: link,
-    ),
-  );
-}
-```
-
-We have made a load of changes how queries and mutations work under the hood. To allow for these changes we had to make some small changes to the API of the `Query` and `Mutation` widgets.
-
-```diff
-Query(
--  readRepositories,
-+  options: QueryOptions(
-+    document: readRepositories,
-    variables: {
-      'nRepositories': 50,
-    },
-    pollInterval: 10,
-+  ),
--  builder: ({
--    bool loading,
--    var data,
--    String error,
--  }) {
-+  builder: (QueryResult result) {
--    if (error != '') {
--      return Text(error);
-+    if (result.errors != null) {
-+      return Text(result.errors.toString());
-    }
-
--    if (loading) {
-+    if (result.loading) {
-      return Text('Loading');
-    }
-
--    List repositories = data['viewer']['repositories']['nodes'];
-+    List repositories = result.data['viewer']['repositories']['nodes'];
-
-    return ListView.builder(
-      itemCount: repositories.length,
-      itemBuilder: (context, index) {
-        final repository = repositories[index];
-
-        return Text(repository['name']);
-    });
-  },
-);
-```
-
-```diff
-Mutation(
--  addStar,
-+  options: MutationOptions(
-+    document: addStar,
-+  ),
-  builder: (
--    runMutation, {
--    bool loading,
--    var data,
--    String error,
-+    RunMutation runMutation,
-+    QueryResult result,
--  }) {
-+  ) {
-    return FloatingActionButton(
-      onPressed: () => runMutation({
-        'starrableId': <A_STARTABLE_REPOSITORY_ID>,
-      }),
-      tooltip: 'Star',
-      child: Icon(Icons.star),
-    );
-  },
-);
-```
-
-That's it! You should now be able to use the latest version of our library.
 
 ## Usage
 
@@ -165,7 +59,7 @@ To use the client it first needs to be initialized with an link and cache. For t
 ```dart
 ...
 
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:flutter_graphql/flutter_graphql.dart';
 
 void main() {
   HttpLink link = HttpLink(
@@ -444,7 +338,15 @@ This is currently our roadmap, please feel free to request additions/changes.
 
 Feel free to open a PR with any suggestions! We'll be actively working on the library ourselves.
 
-## Contributors
+## New Contributors
+
+This package was originally created and published by the engineers at [Zino App BV](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
+
+Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
+
+Coming soon
+
+## Base Contributors
 
 This package was originally created and published by the engineers at [Zino App BV](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
 
@@ -460,8 +362,8 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 
-[version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
-[package]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
+[version-badge]: https://img.shields.io/pub/v/flutter_graphql.svg?style=flat-square
+[package]: https://pub.dartlang.org/packages/flutter_graphql/versions/1.0.0-alpha.3
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg?style=flat-square
 [license]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
