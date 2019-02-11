@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import '../../graphql_flutter.dart';
+import '../../flutter_graphql.dart';
 
 /// Wraps a standard web socket instance to marshal and un-marshal the server /
 /// client payloads into dart object representation.
