@@ -5,7 +5,7 @@ authors:
   - Rex Raphael <rex.raphael@outlook.com>
   - Eus Dima <eus@zinoapp.com>
   - Zino Hofmann <zino@zinoapp.com>
-homepage: https://github.com/juicycleff/graphql-flutter
+homepage: https://github.com/juicycleff/flutter-graphql
 
 dependencies:
   flutter:
