@@ -1,4 +1,4 @@
-# GraphQL Flutter
+# Flutter GraphQL
 
 [![version][version-badge]][package]
 [![MIT License][license-badge]][license]
@@ -10,7 +10,7 @@
 
 ## Table of Contents
 
-- [GraphQL Flutter](#graphql-flutter)
+- [Flutter GraphQL](#flutter-graphql)
   - [Table of Contents](#table-of-contents)
   - [About this project](#about-this-project)
   - [Installation](#installation)
@@ -25,7 +25,7 @@
   - [Roadmap](#roadmap)
   - [Contributing](#contributing)
   - [New Contributors](#new-contributors)
-  - [Base Contributors](#base-contributors)
+  - [Founding Contributors](#founding-contributors)
 
 ## About this project
 
@@ -34,6 +34,10 @@ GraphQL brings many benefits, both to the client: devices will need less request
 This project combines the benefits of GraphQL with the benefits of `Streams` in Dart to deliver a high performace client.
 
 The project took inspriation from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
+
+**Note: Still in alpha**
+
+**Docs is coming soon**
 
 ## Installation
 
@@ -333,22 +337,19 @@ This is currently our roadmap, please feel free to request additions/changes.
 | Optimistic results      |    🔜    |
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
+| Documentation      |    🔜    |
 
 ## Contributing
 
-Feel free to open a PR with any suggestions! We'll be actively working on the library ourselves.
+Feel free to open a PR with any suggestions! We'll be actively working on the library ourselves. If you need control to the repo, please contact me <a href="mailto:rex.raphael@outlook.com">Rex Raphael</a>
 
 ## New Contributors
 
-This package was originally created and published by the engineers at [Zino App BV](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
+This package was originally created and published by the engineers at [Zino App BV](https://zinoapp.com) and with contributions from the community. However the original project has been un-maintained for months and I choose to maintain and keep this project running with other developers.
 
-Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
+| [<img src="https://avatars2.githubusercontent.com/u/4757453?v=4" width="100px;"/><br /><sub><b>Eustatiu Dima</b></sub>](http://rexraphael.com)<br />[🐛](https://github.com/juicycleff/graphql-flutter/issues?q=author%3Ajuicycleff "Bug reports") [💻](https://github.com/juicycleff/graphql-flutter/commits?author=eusdima "Code") [📖](https://github.com/juicycleff/graphql-flutter/commits?author=eusdima "Documentation") [💡](#example-eusdima "Examples") [🤔](#ideas-juicycleff "Ideas, Planning, & Feedback") [👀](#review-eusdima "Reviewed Pull Requests") |
 
-Coming soon
-
-## Base Contributors
-
-This package was originally created and published by the engineers at [Zino App BV](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
+## Founding Contributors
 
 Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
 
@@ -363,12 +364,12 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 
 [version-badge]: https://img.shields.io/pub/v/flutter_graphql.svg?style=flat-square
-[package]: https://pub.dartlang.org/packages/flutter_graphql/versions/1.0.0-alpha.3
-[license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg?style=flat-square
-[license]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
+[package]: https://pub.dartlang.org/packages/flutter_graphql/versions/1.0.0-alpha.12
+[license-badge]: https://img.shields.io/github/license/juicycleff/graphql-flutter.svg?style=flat-square
+[license]: https://github.com/juicycleff/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
 [prs]: http://makeapullrequest.com
-[github-watch-badge]: https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=social
-[github-watch]: https://github.com/zino-app/graphql-flutter/watchers
-[github-star-badge]: https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=social
-[github-star]: https://github.com/zino-app/graphql-flutter/stargazers
+[github-watch-badge]: https://img.shields.io/github/watchers/juicycleff/graphql-flutter.svg?style=social
+[github-watch]: https://github.com/juicycleff/graphql-flutter/watchers
+[github-star-badge]: https://img.shields.io/github/stars/juicycleff/graphql-flutter.svg?style=social
+[github-star]: https://github.com/juicycleff/graphql-flutter/stargazers
