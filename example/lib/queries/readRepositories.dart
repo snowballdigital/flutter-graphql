@@ -1,7 +1,7 @@
-String readRepositories = """
-  query ReadRepositories {
+const String readRepositories = '''
+  query ReadRepositories(\$nRepositories: Int!) {
     viewer {
-      repositories(last: 50) {
+      repositories(last: \$nRepositories) {
         nodes {
           id
           name
@@ -10,5 +10,4 @@ String readRepositories = """
       }
     }
   }
-"""
-    .replaceAll('\n', ' ');
+''';

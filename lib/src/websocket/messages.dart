@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// These messages represent the structures used for Client-server communication
 /// in a GraphQL web-socket subscription. Each message is represented in a JSON
 /// format where the data type is denoted by the `type` field.
@@ -7,24 +9,24 @@ class MessageTypes {
   MessageTypes._();
 
   // client connections
-  static const GQL_CONNECTION_INIT = 'connection_init';
-  static const GQL_CONNECTION_TERMINATE = 'connection_terminate';
+  static const String GQL_CONNECTION_INIT = 'connection_init';
+  static const String GQL_CONNECTION_TERMINATE = 'connection_terminate';
 
   // server connections
-  static const GQL_CONNECTION_ACK = 'connection_ack';
-  static const GQL_CONNECTION_ERROR = 'connection_error';
+  static const String GQL_CONNECTION_ACK = 'connection_ack';
+  static const String GQL_CONNECTION_ERROR = 'connection_error';
 
   // client operations
-  static const GQL_START = 'start';
-  static const GQL_STOP = 'stop';
+  static const String GQL_START = 'start';
+  static const String GQL_STOP = 'stop';
 
   // server operations
-  static const GQL_DATA = 'data';
-  static const GQL_ERROR = 'error';
-  static const GQL_COMPLETE = 'complete';
+  static const String GQL_DATA = 'data';
+  static const String GQL_ERROR = 'error';
+  static const String GQL_COMPLETE = 'complete';
 
   // default tag for use in identifying issues
-  static const GQL_UNKNOWN = 'unknown';
+  static const String GQL_UNKNOWN = 'unknown';
 }
 
 abstract class JsonSerializable {
@@ -45,12 +47,21 @@ abstract class GraphQLSocketMessage extends JsonSerializable {
 /// send this message to tell the server that it is ready to begin sending
 /// new subscription queries.
 class InitOperation extends GraphQLSocketMessage {
-  InitOperation() : super(MessageTypes.GQL_CONNECTION_INIT);
+  final Map<String, String> payload;
+
+  InitOperation(this.payload) : super(MessageTypes.GQL_CONNECTION_INIT);
 
   @override
-  dynamic toJson() => {
-        'type': type,
-      };
+  dynamic toJson() {
+    final Map<String, dynamic> jsonMap = <String, dynamic>{};
+    jsonMap['type'] = type;
+
+    if (payload != null) {
+      jsonMap['payload'] = json.encode(payload);
+    }
+
+    return json.encode(jsonMap);
+  }
 }
 
 /// Represent the payload used during a Start query operation.
@@ -65,7 +76,7 @@ class SubscriptionRequest extends JsonSerializable {
   SubscriptionRequest(this.operationName, this.query, this.variables);
 
   @override
-  dynamic toJson() => {
+  dynamic toJson() => <String, dynamic>{
         'operationName': operationName,
         'query': query,
         'variables': variables,
@@ -84,7 +95,7 @@ class StartOperation extends GraphQLSocketMessage {
   StartOperation(this.id, this.payload) : super(MessageTypes.GQL_START);
 
   @override
-  dynamic toJson() => {
+  dynamic toJson() => <String, dynamic>{
         'type': type,
         'id': id,
         'payload': payload,
@@ -99,7 +110,7 @@ class StopOperation extends GraphQLSocketMessage {
   StopOperation(this.id) : super(MessageTypes.GQL_STOP);
 
   @override
-  dynamic toJson() => {
+  dynamic toJson() => <String, dynamic>{
         'type': type,
         'id': id,
       };
@@ -111,7 +122,7 @@ class ConnectionAck extends GraphQLSocketMessage {
   ConnectionAck() : super(MessageTypes.GQL_CONNECTION_ACK);
 
   @override
-  dynamic toJson() => {
+  dynamic toJson() => <String, dynamic>{
         'type': type,
       };
 }
@@ -124,7 +135,7 @@ class ConnectionError extends GraphQLSocketMessage {
   ConnectionError(this.payload) : super(MessageTypes.GQL_CONNECTION_ERROR);
 
   @override
-  dynamic toJson() => {
+  dynamic toJson() => <String, dynamic>{
         'type': type,
         'payload': payload,
       };
@@ -142,7 +153,7 @@ class SubscriptionData extends GraphQLSocketMessage {
       : super(MessageTypes.GQL_DATA);
 
   @override
-  dynamic toJson() => {
+  dynamic toJson() => <String, dynamic>{
         'type': type,
         'data': data,
         'errors': errors,
@@ -158,7 +169,7 @@ class SubscriptionError extends GraphQLSocketMessage {
   SubscriptionError(this.id, this.payload) : super(MessageTypes.GQL_ERROR);
 
   @override
-  dynamic toJson() => {
+  dynamic toJson() => <String, dynamic>{
         'type': type,
         'id': id,
         'payload': payload,
@@ -173,7 +184,7 @@ class SubscriptionComplete extends GraphQLSocketMessage {
   SubscriptionComplete(this.id) : super(MessageTypes.GQL_COMPLETE);
 
   @override
-  dynamic toJson() => {
+  dynamic toJson() => <String, dynamic>{
         'type': type,
         'id': id,
       };
@@ -188,7 +199,7 @@ class UnknownData extends GraphQLSocketMessage {
   UnknownData(this.payload) : super(MessageTypes.GQL_UNKNOWN);
 
   @override
-  dynamic toJson() => {
+  dynamic toJson() => <String, dynamic>{
         'type': type,
         'payload': payload,
       };
