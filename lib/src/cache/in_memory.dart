@@ -102,4 +102,10 @@ class InMemoryCache implements Cache {
       return HashMap<String, dynamic>();
     }
   }
+
+  @override
+  Future<bool> remove(String key, bool cascade) {
+    // TODO: implement remove
+    return null;
+  }
 }
