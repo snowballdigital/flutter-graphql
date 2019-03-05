@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:core';
 
 class RecordFieldJsonAdapter {
 
