@@ -47,7 +47,11 @@ class QueryState extends State<Query> {
   }
 
   void _initQuery() {
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+    GraphQLClient client;
+    if (_options.client != null) 
+      client =_options.client;
+    else
+      client = GraphQLProvider.of(context).value;
     assert(client != null);
 
     observableQuery?.close();

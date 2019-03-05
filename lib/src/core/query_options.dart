@@ -1,3 +1,4 @@
+import 'package:flutter_graphql/flutter_graphql.dart';
 import 'package:meta/meta.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
@@ -42,12 +43,15 @@ class BaseOptions {
   /// Context to be passed to link execution chain.
   Map<String, dynamic> context;
 
+  GraphQLClient client;
+
   BaseOptions({
     @required this.document,
     this.variables,
     this.fetchPolicy,
     this.errorPolicy,
     this.context,
+    this.client,
   });
 }
 
@@ -64,12 +68,14 @@ class QueryOptions extends BaseOptions {
     ErrorPolicy errorPolicy = ErrorPolicy.none,
     this.pollInterval,
     Map<String, dynamic> context,
+    GraphQLClient client
   }) : super(
           document: document,
           variables: variables,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
           context: context,
+          client:client
         );
 }
 
@@ -81,12 +87,14 @@ class MutationOptions extends BaseOptions {
     FetchPolicy fetchPolicy = FetchPolicy.networkOnly,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
     Map<String, dynamic> context,
+    GraphQLClient client
   }) : super(
           document: document,
           variables: variables,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
           context: context,
+          client:client
         );
 }
 

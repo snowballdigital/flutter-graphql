@@ -9,16 +9,21 @@ class GraphQLConsumer extends StatelessWidget {
   const GraphQLConsumer({
     final Key key,
     @required this.builder,
+    this.client,
   }) : super(key: key);
 
   final GraphQLConsumerBuilder builder;
+  final GraphQLClient client;
 
   @override
   Widget build(BuildContext context) {
-    /// Gets the client from the closest wrapping [GraphQLProvider].
-    final GraphQLClient client = GraphQLProvider.of(context).value;
-    assert(client != null);
+    GraphQLClient tmpClient;
+    if (client != null) 
+      tmpClient = client;
+    else
+      tmpClient = GraphQLProvider.of(context).value;
+    assert(tmpClient != null);
 
-    return builder(client);
+    return builder(tmpClient);
   }
 }
