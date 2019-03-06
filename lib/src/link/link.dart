@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter_graphql/src/link/operation.dart';
 import 'package:flutter_graphql/src/link/fetch_result.dart';
+import 'package:flutter_graphql/src/link/operation.dart';
 
 typedef NextLink = Stream<FetchResult> Function(
   Operation operation,

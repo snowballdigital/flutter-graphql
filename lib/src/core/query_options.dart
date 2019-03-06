@@ -1,4 +1,4 @@
-import 'package:flutter_graphql/flutter_graphql.dart';
+import 'package:flutter_graphql/src/graphql_client.dart';
 import 'package:meta/meta.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
@@ -27,6 +27,15 @@ enum ErrorPolicy {
 
 /// Base options.
 class BaseOptions {
+  BaseOptions({
+    @required this.document,
+    this.variables,
+    this.fetchPolicy,
+    this.errorPolicy,
+    this.context,
+    this.client,
+  });
+
   /// A GraphQL document that consists of a single query to be sent down to the server.
   String document;
 
@@ -44,23 +53,10 @@ class BaseOptions {
   Map<String, dynamic> context;
 
   GraphQLClient client;
-
-  BaseOptions({
-    @required this.document,
-    this.variables,
-    this.fetchPolicy,
-    this.errorPolicy,
-    this.context,
-    this.client,
-  });
 }
 
 /// Query options.
 class QueryOptions extends BaseOptions {
-  /// The time interval (in milliseconds) on which this query should be
-  /// refetched from the server.
-  int pollInterval;
-
   QueryOptions({
     @required String document,
     Map<String, dynamic> variables,
@@ -68,15 +64,19 @@ class QueryOptions extends BaseOptions {
     ErrorPolicy errorPolicy = ErrorPolicy.none,
     this.pollInterval,
     Map<String, dynamic> context,
-    GraphQLClient client
+    GraphQLClient client,
   }) : super(
           document: document,
           variables: variables,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
           context: context,
-          client:client
+          client: client
         );
+
+  /// The time interval (in milliseconds) on which this query should be
+  /// refetched from the server.
+  int pollInterval;
 }
 
 /// Mutation options
@@ -100,9 +100,6 @@ class MutationOptions extends BaseOptions {
 
 // ObservableQuery options
 class WatchQueryOptions extends QueryOptions {
-  /// Whether or not to fetch result.
-  bool fetchResults;
-
   WatchQueryOptions({
     @required String document,
     Map<String, dynamic> variables,
@@ -119,6 +116,9 @@ class WatchQueryOptions extends QueryOptions {
           pollInterval: pollInterval,
           context: context,
         );
+
+  /// Whether or not to fetch result.
+  bool fetchResults;
 
   /// Checks if the [WatchQueryOptions] in this class are equal to some given options.
   bool areEqualTo(WatchQueryOptions otherOptions) {

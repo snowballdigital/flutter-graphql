@@ -7,11 +7,6 @@ import '../../flutter_graphql.dart';
 /// Wraps a standard web socket instance to marshal and un-marshal the server /
 /// client payloads into dart object representation.
 class GraphQLSocket {
-  final StreamController<GraphQLSocketMessage> _subject =
-      StreamController.broadcast();
-
-  final WebSocket _socket;
-
   GraphQLSocket(this._socket) {
     _socket
         .map<Map<String, dynamic>>((dynamic message) => json.decode(message))
@@ -27,6 +22,9 @@ class GraphQLSocket {
             break;
           case MessageTypes.GQL_CONNECTION_ERROR:
             _subject.add(ConnectionError(payload));
+            break;
+          case MessageTypes.GQL_CONNECTION_KEEP_ALIVE:
+            _subject.add(ConnectionKeepAlive());
             break;
           case MessageTypes.GQL_DATA:
             final dynamic data = payload['data'];
@@ -46,6 +44,11 @@ class GraphQLSocket {
     );
   }
 
+  final StreamController<GraphQLSocketMessage> _subject =
+      StreamController<GraphQLSocketMessage>.broadcast();
+
+  final WebSocket _socket;
+
   void write(final GraphQLSocketMessage message) {
     _socket.add(
       json.encode(
@@ -58,6 +61,10 @@ class GraphQLSocket {
   Stream<ConnectionAck> get connectionAck => _subject.stream
       .where((GraphQLSocketMessage message) => message is ConnectionAck)
       .cast<ConnectionAck>();
+
+  Stream<ConnectionKeepAlive> get connectionKeepAlive => _subject.stream
+      .where((GraphQLSocketMessage message) => message is ConnectionKeepAlive)
+      .cast<ConnectionKeepAlive>();
 
   Stream<ConnectionError> get connectionError => _subject.stream
       .where((GraphQLSocketMessage message) => message is ConnectionError)
