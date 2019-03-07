@@ -94,7 +94,7 @@ class MutationOptions extends BaseOptions {
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
           context: context,
-          client:client
+          client: client
         );
 }
 
@@ -108,6 +108,7 @@ class WatchQueryOptions extends QueryOptions {
     int pollInterval,
     this.fetchResults,
     Map<String, dynamic> context,
+    GraphQLClient client,
   }) : super(
           document: document,
           variables: variables,
@@ -115,6 +116,7 @@ class WatchQueryOptions extends QueryOptions {
           errorPolicy: errorPolicy,
           pollInterval: pollInterval,
           context: context,
+          client: client
         );
 
   /// Whether or not to fetch result.
