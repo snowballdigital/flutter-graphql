@@ -16,12 +16,15 @@
   - [Installation](#installation)
   - [Usage](#usage)
     - [GraphQL Provider](#graphql-provider)
+    - [Graphql Link and Headers] (#graphql-link-and-headers)
     - [Offline Cache](#offline-cache)
       - [Normalization](#normalization)
     - [Queries](#queries)
     - [Mutations](#mutations)
     - [Subscriptions (Experimental)](#subscriptions-experimental)
     - [Graphql Consumer](#graphql-consumer)
+    - [Fragments](#fragments)
+    - [Usage outside a widget](#outside-a-widget)
   - [Roadmap](#roadmap)
   - [Contributing](#contributing)
   - [New Contributors](#new-contributors)
@@ -133,7 +136,7 @@ class MyApp extends StatelessWidget {
 ...
 ```
 
-#### Graphql Link and headers
+### Graphql Link and Headers
 You can setup authentication headers and other custom links just like you do with Apollo Graphql
 
 ```dart
@@ -446,7 +449,7 @@ A different client:
   ...
 ```
 
-### Graphql Consumer
+### Fragments
 
 There is support for fragments and it's basically how you use it in Apollo React. For example define your fragment as a dart String.
 
@@ -509,7 +512,7 @@ or
   ...
 ```
 
-### Without a widget
+### Outside a Widget
 
 Similar to withApollo or graphql HoC that passes the client to the component in react, you can call a graphql query from any part of your code base even in a your service class or in your Scoped MOdel or Bloc class. Example
 
