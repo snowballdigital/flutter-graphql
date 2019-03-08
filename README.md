@@ -35,9 +35,9 @@ This project combines the benefits of GraphQL with the benefits of `Streams` in 
 
 The project took inspriation from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
 
-**Note: Still in alpha**
-
+**Note: Still in Beta**
 **Docs is coming soon**
+**Support for all Apollo Graphql component supported props is coming soon**
 
 ## Installation
 
@@ -45,7 +45,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_graphql: ^1.0.0-alpha
+  flutter_graphql: ^1.0.0-rc.1
 ```
 
 Now inside your Dart code you can import it.
@@ -133,6 +133,66 @@ class MyApp extends StatelessWidget {
 ...
 ```
 
+#### Graphql Link and headers
+You can setup authentication headers and other custom links just like you do with Apollo Graphql
+
+```dart
+  import 'dart:async';
+
+  import 'package:flutter/material.dart';
+  import 'package:flutter_graphql/flutter_graphql.dart';
+  import 'package:flutter_graphql/src/link/operation.dart';
+  import 'package:flutter_graphql/src/link/fetch_result.dart';
+
+  class AuthLink extends Link {
+    AuthLink()
+        : super(
+      request: (Operation operation, [NextLink forward]) {
+        StreamController<FetchResult> controller;
+
+        Future<void> onListen() async {
+          try {
+            var token = await AuthUtil.getToken();
+            operation.setContext(<String, Map<String, String>>{
+              'headers': <String, String>{'Authorization': '''bearer $token'''}
+            });
+          } catch (error) {
+            controller.addError(error);
+          }
+
+          await controller.addStream(forward(operation));
+          await controller.close();
+        }
+
+        controller = StreamController<FetchResult>(onListen: onListen);
+
+        return controller.stream;
+      },
+    );
+  }
+
+  var cache = InMemoryCache();
+
+  var authLink = AuthLink()
+      .concat(HttpLink(uri: 'http://yourgraphqlserver.com/graphql'));
+      
+  final ValueNotifier<GraphQLClient> client = ValueNotifier(
+    GraphQLClient(
+      cache: cache,
+      link: authLink,
+    ),
+  );
+
+  final ValueNotifier<GraphQLClient> anotherClient = ValueNotifier(
+    GraphQLClient(
+      cache: cache,
+      link: authLink,
+    ),
+  );
+    
+```
+However note that **`flutter-graphql` does not inject __typename into operations** the way apollo does, so if you aren't careful to request them in your query, this normalization scheme is not possible.
+
 #### Normalization
 To enable [apollo-like normalization](https://www.apollographql.com/docs/react/advanced/caching.html#normalization), use a `NormalizedInMemoryCache`:
 ```dart
@@ -161,23 +221,18 @@ However note that **`flutter-graphql` does not inject __typename into operations
 
 ### Queries
 
-Creating a query is as simple as creating a multiline string:
+To create a query, you just need to define a String variable like the one below. With full support of fragments
 
 ```dart
-String readRepositories = """
-  query ReadRepositories(\$nRepositories) {
-    viewer {
-      repositories(last: \$nRepositories) {
-        nodes {
-          id
-          name
-          viewerHasStarred
-        }
-      }
+const GET_ALL_PEOPLE = '''
+  query getPeople{
+    readAll{
+      name
+      age
+      sex
     }
   }
-"""
-    .replaceAll('\n', ' ');
+''';
 ```
 
 In your widget:
@@ -187,10 +242,7 @@ In your widget:
 
 Query(
   options: QueryOptions(
-    document: readRepositories, // this is the query string you just created
-    variables: {
-      'nRepositories': 50,
-    },
+    document: GET_ALL_PEOPLE, // this is the query string you just created
     pollInterval: 10,
   ),
   builder: (QueryResult result) {
@@ -203,15 +255,68 @@ Query(
     }
 
     // it can be either Map or List
-    List repositories = result.data['viewer']['repositories']['nodes'];
+    List people = result.data['getPeople'];
 
     return ListView.builder(
-      itemCount: repositories.length,
+      itemCount: people.length,
       itemBuilder: (context, index) {
-        final repository = repositories[index];
+        final repository = people[index];
 
-        return Text(repository['name']);
+        return Text(people['name']);
     });
+  },
+);
+
+...
+```
+
+Other examples with query argments and passing in a custom graphql client
+
+```dart
+const READ_BY_ID = '''
+  query readById(\$id: String!){
+    readById(ID: \$id){
+      name
+      age
+      sex
+    }
+  }
+  
+  
+final ValueNotifier<GraphQLClient> userClient = ValueNotifier(
+  GraphQLClient(
+    cache: cache,
+    link: authLinkProfile,
+  ),
+);
+
+''';
+```
+
+In your widget:
+
+```dart
+...
+
+Query(
+  options: QueryOptions(
+    document: READ_BY_ID, // this is the query string you just created
+    pollInterval: 10,
+    client: userClient.value
+  ),
+  builder: (QueryResult result) {
+    if (result.errors != null) {
+      return Text(result.errors.toString());
+    }
+
+    if (result.loading) {
+      return Text('Loading');
+    }
+
+    // it can be either Map or List
+    List person = result.data['getPeople'];
+
+    return Text(person['name']);
   },
 );
 
@@ -223,16 +328,16 @@ Query(
 Again first create a mutation string:
 
 ```dart
-String addStar = """
-  mutation AddStar(\$starrableId: ID!) {
-    addStar(input: {starrableId: \$starrableId}) {
-      starrable {
-        viewerHasStarred
+const LIKE_BLOG = '''
+  mutation likeBlog(\$id: Int!) {
+    likeBlog(id: \$id){
+      name
+      author {
+        name
+        displayImage
       }
-    }
   }
-"""
-    .replaceAll('\n', ' ');
+''';
 ```
 
 The syntax for mutations is fairly similar to that of a query. The only diffence is that the first argument of the builder function is a mutation function. Just call it to trigger the mutations (Yeah we deliberately stole this from react-apollo.)
@@ -242,7 +347,7 @@ The syntax for mutations is fairly similar to that of a query. The only diffence
 
 Mutation(
   options: MutationOptions(
-    document: addStar, // this is the mutation string you just created
+    document: LIKE_BLOG, // this is the mutation string you just created
   ),
   builder: (
     RunMutation runMutation,
@@ -250,7 +355,7 @@ Mutation(
   ) {
     return FloatingActionButton(
       onPressed: () => runMutation({
-        'starrableId': <A_STARTABLE_REPOSITORY_ID>,
+        'id': <BLOG_ID>,
       }),
       tooltip: 'Star',
       child: Icon(Icons.star),
@@ -304,7 +409,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 ### Graphql Consumer
 
-You can always access the client direcly from the `GraphQLProvider` but to make it even easier you can also use the `GraphQLConsumer` widget.
+You can always access the client direcly from the `GraphQLProvider` but to make it even easier you can also use the `GraphQLConsumer` widget. You can also pass in a another client to the consumer
 
 ```dart
   ...
@@ -322,6 +427,208 @@ You can always access the client direcly from the `GraphQLProvider` but to make 
   ...
 ```
 
+A different client:
+
+```dart
+  ...
+
+  return GraphQLConsumer(
+    client: userClient,
+    builder: (GraphQLClient client) {
+      // do something with the client
+
+      return Container(
+        child: Text('Hello world'),
+      );
+    },
+  );
+
+  ...
+```
+
+### Graphql Consumer
+
+There is support for fragments and it's basically how you use it in Apollo React. For example define your fragment as a dart String.
+
+```dart
+  ...
+const UserFragment = '''
+  fragment UserFragmentFull on Profile {
+    address {
+      city
+      country
+      postalCode
+      street
+    }
+    birthdate
+    email
+    firstname
+    id
+    lastname]
+  }
+  ''';
+
+  ...
+```
+
+Now you can use it in your Graphql Query or Mutation String like below
+```dart
+  ...
+
+  const CURRENT_USER = '''
+    query read{
+      read {
+      ...UserFragmentFull
+      }
+    }
+    $UserFragment
+  ''';
+
+  ...
+```
+
+or
+
+```dart
+  ...
+
+  const GET_BLOGS = '''
+    query getBlogs{
+      getBlog {
+        title
+        description
+        tags
+        
+        author {
+          ...UserFragmentFull
+        }
+    }
+    $UserFragment
+  ''';
+
+  ...
+```
+
+### Without a widget
+
+Similar to withApollo or graphql HoC that passes the client to the component in react, you can call a graphql query from any part of your code base even in a your service class or in your Scoped MOdel or Bloc class. Example
+
+```dart
+  ...
+
+  class AuthUtil{
+    static Future<String> getToken() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return await prefs.getString('token');
+    }
+
+    static Future setToken(value) async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return await prefs.setString('token', value);
+    }
+
+    static removeToken() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return await prefs.remove('token');
+    }
+
+    static clear() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return await prefs.clear();
+    }
+    
+    static Future<bool> logIn(String username, String password) async {
+      var token;
+
+      QueryOptions queryOptions = QueryOptions(
+          document: LOGIN,
+          variables: {
+            'username': username,
+            'password': password
+          }
+      );
+
+      if (result != null) {
+        this.setToken(result);
+        return clientProfile.value.query(queryOptions).then((result) async {
+
+          if(result.data != null) {
+            token = result.data['login']['token];
+            notifyListeners();
+            return token;
+          } else {
+            return throw Error;
+          }
+
+        }).catchError((error) {
+            return throw Error;
+        });
+      } else
+        return false;
+    }
+  }
+
+  ...
+```
+
+In a scoped model:
+
+```dart
+  ...
+class AppModel extends Model {
+
+  String token = '';
+  var currentUser = new Map <String, dynamic>();
+
+  static AppModel of(BuildContext context) =>
+      ScopedModel.of<AppModel>(context);
+
+  void setToken(String value) {
+    token = value;
+    AuthUtil.setAppURI(value);
+    notifyListeners();
+  }
+
+
+  String getToken() {
+    if (token != null) return token;
+    else AuthUtil.getToken();
+  }
+
+  getCurrentUser() {
+    return currentUser;
+  }
+
+  Future<bool> isLoggedIn() async {
+
+    var result = await AuthUtil.getToken();
+    print(result);
+
+    QueryOptions queryOptions = QueryOptions(
+        document: CURRENT_USER
+    );
+
+    if (result != null) {
+      print(result);
+      this.setToken(result);
+      return clientProfile.value.query(queryOptions).then((result) async {
+
+        if(result.data != null) {
+          currentUser = result.data['read'];
+          notifyListeners();
+          return true;
+        } else {
+          return false;
+        }
+
+      }).catchError((error) {
+        print('''Error => $error''');
+        return false;
+      });
+    } else
+      return false;
+  }
+}
 ## Roadmap
 
 This is currently our roadmap, please feel free to request additions/changes.
