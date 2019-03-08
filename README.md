@@ -629,6 +629,8 @@ class AppModel extends Model {
       return false;
   }
 }
+```
+
 ## Roadmap
 
 This is currently our roadmap, please feel free to request additions/changes.
