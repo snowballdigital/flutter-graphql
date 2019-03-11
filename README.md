@@ -467,7 +467,7 @@ const UserFragment = '''
     email
     firstname
     id
-    lastname]
+    lastname
   }
   ''';
 
