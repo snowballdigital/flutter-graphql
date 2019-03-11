@@ -3,7 +3,7 @@ description: A GraphQL client for Flutter, bringing all the features from a mode
 version: 1.0.0-rc.3
 authors:
   - Rex Raphael <rex.raphael@outlook.com>
-homepage: https://github.com/juicycleff/graphql-flutter/tree/master
+homepage: https://github.com/snowballdigital/graphql-flutter/tree/master
 
 dependencies:
   flutter:
