@@ -40,7 +40,7 @@ The project took inspriation from the [Apollo GraphQL client](https://github.com
 
 **Note: Still in Beta**
 **Docs is coming soon**
-**Support for all Apollo Graphql component supported props is coming soon**
+**Support for all React Apollo Graphql component supported props is coming soon**
 
 ## Installation
 
