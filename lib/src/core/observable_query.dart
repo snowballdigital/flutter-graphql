@@ -50,6 +50,11 @@ class ObservableQuery {
 
   void onListen() {
     if (options.fetchResults) {
+      controller.add(
+        QueryResult(
+          loading: true,
+        ),
+      );
       fetchResults();
     }
   }
