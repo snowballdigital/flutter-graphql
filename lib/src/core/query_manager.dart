@@ -62,6 +62,7 @@ class QueryManager {
   Future<QueryResult> fetchQuery(
     String queryId,
     BaseOptions options,
+    {FetchType fetchType}
   ) async {
     final ObservableQuery observableQuery = getQuery(queryId);
     // XXX there is a bug in the `graphql_parser` package, where this result might be

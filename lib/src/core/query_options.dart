@@ -32,6 +32,7 @@ class BaseOptions {
     this.variables,
     this.fetchPolicy,
     this.errorPolicy,
+    this.notifyOnNetworkStatusChange,
     this.context,
     this.client,
   });
@@ -63,6 +64,7 @@ class QueryOptions extends BaseOptions {
     FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
     this.pollInterval,
+    this.notifyOnNetworkStatusChange,
     Map<String, dynamic> context,
     GraphQLClient client,
   }) : super(
@@ -77,6 +79,9 @@ class QueryOptions extends BaseOptions {
   /// The time interval (in milliseconds) on which this query should be
   /// refetched from the server.
   int pollInterval;
+
+  /// Notify to refetch query when network changes
+  bool notifyOnNetworkStatusChange;
 }
 
 /// Mutation options
