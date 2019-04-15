@@ -1,19 +1,25 @@
-.vs/
-.vscode/
-.idea/libraries/
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/usage.statistics.xml
+# Auto detect text files and perform LF normalization
+*        text=auto
 
-.DS_Store
-.dart_tool/
+# Always perform LF normalization on these files
+*.dart   text
+*.gradle text
+*.html   text
+*.java   text
+*.json   text
+*.md     text
+*.py     text
+*.sh     text
+*.txt    text
+*.xml    text
+*.yaml   text
 
-.packages
-.pub/
-pubspec.lock
+# Make sure that these Windows files always have CRLF line endings in checkout
+*.bat    text eol=crlf
+*.ps1    text eol=crlf
 
-build/
-ios/.generated/
-ios/Flutter/Generated.xcconfig
-ios/Runner/GeneratedPluginRegistrant.*
-.flutter-plugins
+# Never perform LF normalization on these files
+*.ico    binary
+*.jar    binary
+*.png    binary
+*.zip    binary
