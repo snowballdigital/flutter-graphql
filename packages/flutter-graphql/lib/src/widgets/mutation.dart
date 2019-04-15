@@ -49,6 +49,7 @@ class MutationState extends State<Mutation> {
         errorPolicy: widget.options.errorPolicy,
         fetchResults: false,
         context: widget.options.context,
+        client: widget.options.client
       );
 
   // TODO is it possible to extract shared logic into mixin

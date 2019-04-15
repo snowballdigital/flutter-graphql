@@ -43,6 +43,7 @@ class QueryState extends State<Query> {
       pollInterval: widget.options.pollInterval,
       fetchResults: true,
       context: widget.options.context,
+      client: widget.options.client
     );
   }
 

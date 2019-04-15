@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_graphql/flutter_graphql.dart';
-import 'package:flutter_graphql/src/core/network_status.dart';
 import 'package:flutter_graphql/src/core/query_manager.dart';
 import 'package:flutter_graphql/src/core/query_result.dart';
 import 'package:flutter_graphql/src/scheduler/scheduler.dart';
@@ -51,6 +50,11 @@ class ObservableQuery {
 
   void onListen() {
     if (options.fetchResults) {
+      controller.add(
+        QueryResult(
+          loading: true,
+        ),
+      );
       fetchResults();
     }
   }
@@ -73,18 +77,10 @@ class ObservableQuery {
     controller.add(
       QueryResult(
         loading: true,
-        networkStatus: NetworkStatus.loading
       ),
     );
   }
 
-  void sendNetworkStatus(NetworkStatus networkStatus) {
-    controller.add(
-      QueryResult(
-        networkStatus: networkStatus,
-      ),
-    );
-  }
   // most mutation behavior happens here
   void onData(Iterable<OnData> callbacks) {
     if (callbacks != null && callbacks.isNotEmpty) {
@@ -130,7 +126,6 @@ class ObservableQuery {
     options.pollInterval = pollInterval;
     lifecycle = QueryLifecycle.POLLING;
     scheduler.startPollingQuery(options, queryId);
-    sendNetworkStatus(NetworkStatus.poll);
   }
 
   void stopPolling() {
@@ -138,15 +133,11 @@ class ObservableQuery {
       scheduler.stopPollingQuery(queryId);
       options.pollInterval = null;
       lifecycle = QueryLifecycle.POLLING_STOPPED;
-      sendNetworkStatus(NetworkStatus.ready);
     }
   }
 
   void setVariables(Map<String, dynamic> variables) {
     options.variables = variables;
-
-    // Notify network status
-    sendNetworkStatus(NetworkStatus.setVariables);
   }
 
   Future<void> close({bool force = false, bool fromManager = false}) async {

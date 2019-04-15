@@ -1,19 +1,10 @@
 import 'package:flutter_graphql/src/core/graphql_error.dart';
-import 'package:flutter_graphql/src/core/network_status.dart';
-
-enum FetchType {
-  normal,
-  refetch,
-  poll,
-}
 
 class QueryResult {
-
   QueryResult({
     this.data,
     this.errors,
     this.loading,
-    this.networkStatus,
     this.stale,
   });
 
@@ -22,7 +13,6 @@ class QueryResult {
   List<GraphQLError> errors;
   bool loading;
   bool stale;
-  NetworkStatus networkStatus;
 
   bool get hasErrors {
     if (errors == null) {
