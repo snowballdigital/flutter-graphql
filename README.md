@@ -16,12 +16,15 @@
   - [Installation](#installation)
   - [Usage](#usage)
     - [GraphQL Provider](#graphql-provider)
+    - [Graphql Link and Headers] (#graphql-link-and-headers)
     - [Offline Cache](#offline-cache)
       - [Normalization](#normalization)
     - [Queries](#queries)
     - [Mutations](#mutations)
     - [Subscriptions (Experimental)](#subscriptions-experimental)
     - [Graphql Consumer](#graphql-consumer)
+    - [Fragments](#fragments)
+    - [Usage outside a widget](#outside-a-widget)
   - [Roadmap](#roadmap)
   - [Contributing](#contributing)
   - [New Contributors](#new-contributors)
@@ -35,9 +38,9 @@ This project combines the benefits of GraphQL with the benefits of `Streams` in 
 
 The project took inspriation from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
 
-**Note: Still in alpha**
-
+**Note: Still in Beta**
 **Docs is coming soon**
+**Support for all React Apollo Graphql component supported props is coming soon**
 
 ## Installation
 
@@ -45,7 +48,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  flutter_graphql: ^1.0.0-alpha
+  flutter_graphql: ^1.0.0-rc.3
 ```
 
 Now inside your Dart code you can import it.
@@ -133,6 +136,66 @@ class MyApp extends StatelessWidget {
 ...
 ```
 
+### Graphql Link and Headers
+You can setup authentication headers and other custom links just like you do with Apollo Graphql
+
+```dart
+  import 'dart:async';
+
+  import 'package:flutter/material.dart';
+  import 'package:flutter_graphql/flutter_graphql.dart';
+  import 'package:flutter_graphql/src/link/operation.dart';
+  import 'package:flutter_graphql/src/link/fetch_result.dart';
+
+  class AuthLink extends Link {
+    AuthLink()
+        : super(
+      request: (Operation operation, [NextLink forward]) {
+        StreamController<FetchResult> controller;
+
+        Future<void> onListen() async {
+          try {
+            var token = await AuthUtil.getToken();
+            operation.setContext(<String, Map<String, String>>{
+              'headers': <String, String>{'Authorization': '''bearer $token'''}
+            });
+          } catch (error) {
+            controller.addError(error);
+          }
+
+          await controller.addStream(forward(operation));
+          await controller.close();
+        }
+
+        controller = StreamController<FetchResult>(onListen: onListen);
+
+        return controller.stream;
+      },
+    );
+  }
+
+  var cache = InMemoryCache();
+
+  var authLink = AuthLink()
+      .concat(HttpLink(uri: 'http://yourgraphqlserver.com/graphql'));
+      
+  final ValueNotifier<GraphQLClient> client = ValueNotifier(
+    GraphQLClient(
+      cache: cache,
+      link: authLink,
+    ),
+  );
+
+  final ValueNotifier<GraphQLClient> anotherClient = ValueNotifier(
+    GraphQLClient(
+      cache: cache,
+      link: authLink,
+    ),
+  );
+    
+```
+However note that **`flutter-graphql` does not inject __typename into operations** the way apollo does, so if you aren't careful to request them in your query, this normalization scheme is not possible.
+
 #### Normalization
 To enable [apollo-like normalization](https://www.apollographql.com/docs/react/advanced/caching.html#normalization), use a `NormalizedInMemoryCache`:
 ```dart
@@ -161,23 +224,18 @@ However note that **`flutter-graphql` does not inject __typename into operations
 
 ### Queries
 
-Creating a query is as simple as creating a multiline string:
+To create a query, you just need to define a String variable like the one below. With full support of fragments
 
 ```dart
-String readRepositories = """
-  query ReadRepositories(\$nRepositories) {
-    viewer {
-      repositories(last: \$nRepositories) {
-        nodes {
-          id
-          name
-          viewerHasStarred
-        }
-      }
+const GET_ALL_PEOPLE = '''
+  query getPeople{
+    readAll{
+      name
+      age
+      sex
     }
   }
-"""
-    .replaceAll('\n', ' ');
+''';
 ```
 
 In your widget:
@@ -187,10 +245,7 @@ In your widget:
 
 Query(
   options: QueryOptions(
-    document: readRepositories, // this is the query string you just created
-    variables: {
-      'nRepositories': 50,
-    },
+    document: GET_ALL_PEOPLE, // this is the query string you just created
     pollInterval: 10,
   ),
   builder: (QueryResult result) {
@@ -203,15 +258,68 @@ Query(
     }
 
     // it can be either Map or List
-    List repositories = result.data['viewer']['repositories']['nodes'];
+    List people = result.data['getPeople'];
 
     return ListView.builder(
-      itemCount: repositories.length,
+      itemCount: people.length,
       itemBuilder: (context, index) {
-        final repository = repositories[index];
+        final repository = people[index];
 
-        return Text(repository['name']);
+        return Text(people['name']);
     });
+  },
+);
+
+...
+```
+
+Other examples with query argments and passing in a custom graphql client
+
+```dart
+const READ_BY_ID = '''
+  query readById(\$id: String!){
+    readById(ID: \$id){
+      name
+      age
+      sex
+    }
+  }
+  
+  
+final ValueNotifier<GraphQLClient> userClient = ValueNotifier(
+  GraphQLClient(
+    cache: cache,
+    link: authLinkProfile,
+  ),
+);
+
+''';
+```
+
+In your widget:
+
+```dart
+...
+
+Query(
+  options: QueryOptions(
+    document: READ_BY_ID, // this is the query string you just created
+    pollInterval: 10,
+    client: userClient.value
+  ),
+  builder: (QueryResult result) {
+    if (result.errors != null) {
+      return Text(result.errors.toString());
+    }
+
+    if (result.loading) {
+      return Text('Loading');
+    }
+
+    // it can be either Map or List
+    List person = result.data['getPeople'];
+
+    return Text(person['name']);
   },
 );
 
@@ -223,16 +331,16 @@ Query(
 Again first create a mutation string:
 
 ```dart
-String addStar = """
-  mutation AddStar(\$starrableId: ID!) {
-    addStar(input: {starrableId: \$starrableId}) {
-      starrable {
-        viewerHasStarred
+const LIKE_BLOG = '''
+  mutation likeBlog(\$id: Int!) {
+    likeBlog(id: \$id){
+      name
+      author {
+        name
+        displayImage
       }
-    }
   }
-"""
-    .replaceAll('\n', ' ');
+''';
 ```
 
 The syntax for mutations is fairly similar to that of a query. The only diffence is that the first argument of the builder function is a mutation function. Just call it to trigger the mutations (Yeah we deliberately stole this from react-apollo.)
@@ -242,7 +350,7 @@ The syntax for mutations is fairly similar to that of a query. The only diffence
 
 Mutation(
   options: MutationOptions(
-    document: addStar, // this is the mutation string you just created
+    document: LIKE_BLOG, // this is the mutation string you just created
   ),
   builder: (
     RunMutation runMutation,
@@ -250,7 +358,7 @@ Mutation(
   ) {
     return FloatingActionButton(
       onPressed: () => runMutation({
-        'starrableId': <A_STARTABLE_REPOSITORY_ID>,
+        'id': <BLOG_ID>,
       }),
       tooltip: 'Star',
       child: Icon(Icons.star),
@@ -304,7 +412,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 ### Graphql Consumer
 
-You can always access the client direcly from the `GraphQLProvider` but to make it even easier you can also use the `GraphQLConsumer` widget.
+You can always access the client direcly from the `GraphQLProvider` but to make it even easier you can also use the `GraphQLConsumer` widget. You can also pass in a another client to the consumer
 
 ```dart
   ...
@@ -320,6 +428,210 @@ You can always access the client direcly from the `GraphQLProvider` but to make 
   );
 
   ...
+```
+
+A different client:
+
+```dart
+  ...
+
+  return GraphQLConsumer(
+    client: userClient,
+    builder: (GraphQLClient client) {
+      // do something with the client
+
+      return Container(
+        child: Text('Hello world'),
+      );
+    },
+  );
+
+  ...
+```
+
+### Fragments
+
+There is support for fragments and it's basically how you use it in Apollo React. For example define your fragment as a dart String.
+
+```dart
+  ...
+const UserFragment = '''
+  fragment UserFragmentFull on Profile {
+    address {
+      city
+      country
+      postalCode
+      street
+    }
+    birthdate
+    email
+    firstname
+    id
+    lastname
+  }
+  ''';
+
+  ...
+```
+
+Now you can use it in your Graphql Query or Mutation String like below
+```dart
+  ...
+
+  const CURRENT_USER = '''
+    query read{
+      read {
+      ...UserFragmentFull
+      }
+    }
+    $UserFragment
+  ''';
+
+  ...
+```
+
+or
+
+```dart
+  ...
+
+  const GET_BLOGS = '''
+    query getBlogs{
+      getBlog {
+        title
+        description
+        tags
+        
+        author {
+          ...UserFragmentFull
+        }
+    }
+    $UserFragment
+  ''';
+
+  ...
+```
+
+### Outside a Widget
+
+Similar to withApollo or graphql HoC that passes the client to the component in react, you can call a graphql query from any part of your code base even in a your service class or in your Scoped MOdel or Bloc class. Example
+
+```dart
+  ...
+
+  class AuthUtil{
+    static Future<String> getToken() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return await prefs.getString('token');
+    }
+
+    static Future setToken(value) async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return await prefs.setString('token', value);
+    }
+
+    static removeToken() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return await prefs.remove('token');
+    }
+
+    static clear() async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      return await prefs.clear();
+    }
+    
+    static Future<bool> logIn(String username, String password) async {
+      var token;
+
+      QueryOptions queryOptions = QueryOptions(
+          document: LOGIN,
+          variables: {
+            'username': username,
+            'password': password
+          }
+      );
+
+      if (result != null) {
+        this.setToken(result);
+        return clientProfile.value.query(queryOptions).then((result) async {
+
+          if(result.data != null) {
+            token = result.data['login']['token];
+            notifyListeners();
+            return token;
+          } else {
+            return throw Error;
+          }
+
+        }).catchError((error) {
+            return throw Error;
+        });
+      } else
+        return false;
+    }
+  }
+
+  ...
+```
+
+In a scoped model:
+
+```dart
+  ...
+class AppModel extends Model {
+
+  String token = '';
+  var currentUser = new Map <String, dynamic>();
+
+  static AppModel of(BuildContext context) =>
+      ScopedModel.of<AppModel>(context);
+
+  void setToken(String value) {
+    token = value;
+    AuthUtil.setAppURI(value);
+    notifyListeners();
+  }
+
+
+  String getToken() {
+    if (token != null) return token;
+    else AuthUtil.getToken();
+  }
+
+  getCurrentUser() {
+    return currentUser;
+  }
+
+  Future<bool> isLoggedIn() async {
+
+    var result = await AuthUtil.getToken();
+    print(result);
+
+    QueryOptions queryOptions = QueryOptions(
+        document: CURRENT_USER
+    );
+
+    if (result != null) {
+      print(result);
+      this.setToken(result);
+      return clientProfile.value.query(queryOptions).then((result) async {
+
+        if(result.data != null) {
+          currentUser = result.data['read'];
+          notifyListeners();
+          return true;
+        } else {
+          return false;
+        }
+
+      }).catchError((error) {
+        print('''Error => $error''');
+        return false;
+      });
+    } else
+      return false;
+  }
+}
 ```
 
 ## Roadmap
@@ -342,24 +654,6 @@ This is currently our roadmap, please feel free to request additions/changes.
 ## Contributing
 
 Feel free to open a PR with any suggestions! We'll be actively working on the library ourselves. If you need control to the repo, please contact me <a href="mailto:rex.raphael@outlook.com">Rex Raphael</a>. Please fork and send your PRs to the <a href="https://github.com/juicycleff/flutter-graphql/tree/v1.0.0">v.1.0.0</a> branch.
-
-## New Contributors
-
-This package was originally created and published by the engineers at [Zino App BV](https://zinoapp.com) and with contributions from the community. However the original project has been un-maintained for months and I choose to maintain and keep this project running with other developers.
-
-| [<img src="https://avatars2.githubusercontent.com/u/4757453?v=4" width="100px;"/><br /><sub><b>Eustatiu Dima</b></sub>](http://rexraphael.com)<br />[🐛](https://github.com/juicycleff/flutter-graphql/issues?q=author%3Ajuicycleff "Bug reports") [💻](https://github.com/juicycleff/flutter-graphql/commits?author=eusdima "Code") [📖](https://github.com/juicycleff/flutter-graphql/commits?author=eusdima "Documentation") [💡](#example-eusdima "Examples") [🤔](#ideas-juicycleff "Ideas, Planning, & Feedback") [👀](#review-eusdima "Reviewed Pull Requests") |
-
-## Founding Contributors
-
-Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
-| [<img src="https://avatars2.githubusercontent.com/u/4757453?v=4" width="100px;"/><br /><sub><b>Eustatiu Dima</b></sub>](http://eusdima.com)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3Aeusdima "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=eusdima "Code") [📖](https://github.com/zino-app/flutter-graphql/commits?author=eusdima "Documentation") [💡](#example-eusdima "Examples") [🤔](#ideas-eusdima "Ideas, Planning, & Feedback") [👀](#review-eusdima "Reviewed Pull Requests") | [<img src="https://avatars3.githubusercontent.com/u/17142193?v=4" width="100px;"/><br /><sub><b>Zino Hofmann</b></sub>](https://github.com/HofmannZ)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3AHofmannZ "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=HofmannZ "Code") [📖](https://github.com/zino-app/flutter-graphql/commits?author=HofmannZ "Documentation") [💡](#example-HofmannZ "Examples") [🤔](#ideas-HofmannZ "Ideas, Planning, & Feedback") [🚇](#infra-HofmannZ "Infrastructure (Hosting, Build-Tools, etc)") [👀](#review-HofmannZ "Reviewed Pull Requests") | [<img src="https://avatars2.githubusercontent.com/u/15068096?v=4" width="100px;"/><br /><sub><b>Harkirat Saluja</b></sub>](https://github.com/jinxac)<br />[📖](https://github.com/zino-app/flutter-graphql/commits?author=jinxac "Documentation") [🤔](#ideas-jinxac "Ideas, Planning, & Feedback") | [<img src="https://avatars3.githubusercontent.com/u/5178217?v=4" width="100px;"/><br /><sub><b>Chris Muthig</b></sub>](https://github.com/camuthig)<br />[💻](https://github.com/zino-app/flutter-graphql/commits?author=camuthig "Code") [📖](https://github.com/zino-app/flutter-graphql/commits?author=camuthig "Documentation") [💡](#example-camuthig "Examples") [🤔](#ideas-camuthig "Ideas, Planning, & Feedback") | [<img src="https://avatars1.githubusercontent.com/u/7611406?v=4" width="100px;"/><br /><sub><b>Cal Pratt</b></sub>](http://stackoverflow.com/users/3280538/flkes)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3Acal-pratt "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=cal-pratt "Code") [📖](https://github.com/zino-app/flutter-graphql/commits?author=cal-pratt "Documentation") [💡](#example-cal-pratt "Examples") [🤔](#ideas-cal-pratt "Ideas, Planning, & Feedback") | [<img src="https://avatars0.githubusercontent.com/u/9830761?v=4" width="100px;"/><br /><sub><b>Miroslav Valkovic-Madjer</b></sub>](http://madjer.info)<br />[💻](https://github.com/zino-app/flutter-graphql/commits?author=mmadjer "Code") | [<img src="https://avatars2.githubusercontent.com/u/4523129?v=4" width="100px;"/><br /><sub><b>Aleksandar Faraj</b></sub>](https://github.com/AleksandarFaraj)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3AAleksandarFaraj "Bug reports") |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| [<img src="https://avatars0.githubusercontent.com/u/403029?v=4" width="100px;"/><br /><sub><b>Arnaud Delcasse</b></sub>](https://www.scity.coop)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3Aadelcasse "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=adelcasse "Code") | [<img src="https://avatars0.githubusercontent.com/u/959931?v=4" width="100px;"/><br /><sub><b>Dustin Graham</b></sub>](https://github.com/dustin-graham)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3Adustin-graham "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=dustin-graham "Code") | [<img src="https://avatars3.githubusercontent.com/u/1375034?v=4" width="100px;"/><br /><sub><b>Fábio Carneiro</b></sub>](https://github.com/fabiocarneiro)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3Afabiocarneiro "Bug reports") | [<img src="https://avatars0.githubusercontent.com/u/480546?v=4" width="100px;"/><br /><sub><b>Gregor</b></sub>](https://github.com/lordgreg)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3Alordgreg "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=lordgreg "Code") [🤔](#ideas-lordgreg "Ideas, Planning, & Feedback") | [<img src="https://avatars1.githubusercontent.com/u/5159563?v=4" width="100px;"/><br /><sub><b>Kolja Esders</b></sub>](https://github.com/kolja-esders)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3Akolja-esders "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=kolja-esders "Code") [🤔](#ideas-kolja-esders "Ideas, Planning, & Feedback") | [<img src="https://avatars1.githubusercontent.com/u/8343799?v=4" width="100px;"/><br /><sub><b>Michael Joseph Rosenthal</b></sub>](https://github.com/micimize)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3Amicimize "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=micimize "Code") [📖](https://github.com/zino-app/flutter-graphql/commits?author=micimize "Documentation") [💡](#example-micimize "Examples") [🤔](#ideas-micimize "Ideas, Planning, & Feedback") [⚠️](https://github.com/zino-app/flutter-graphql/commits?author=micimize "Tests") | [<img src="https://avatars2.githubusercontent.com/u/735858?v=4" width="100px;"/><br /><sub><b>Igor Borges</b></sub>](http://borges.me/)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3AIgor1201 "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=Igor1201 "Code") |
-| [<img src="https://avatars1.githubusercontent.com/u/6992724?v=4" width="100px;"/><br /><sub><b>Rafael Ring</b></sub>](https://github.com/rafaelring)<br />[🐛](https://github.com/zino-app/flutter-graphql/issues?q=author%3Arafaelring "Bug reports") [💻](https://github.com/zino-app/flutter-graphql/commits?author=rafaelring "Code") |
-<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 
