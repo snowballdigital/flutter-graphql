@@ -8,9 +8,9 @@ import '../websocket/messages.dart';
 typedef OnSubscriptionCompleted = void Function();
 
 typedef SubscriptionBuilder = Widget Function({
-  final bool loading,
-  final dynamic payload,
-  final dynamic error,
+  bool loading,
+  dynamic payload,
+  dynamic error,
 });
 
 class Subscription extends StatefulWidget {
