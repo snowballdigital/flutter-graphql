@@ -16,7 +16,7 @@
   - [Installation](#installation)
   - [Usage](#usage)
     - [GraphQL Provider](#graphql-provider)
-    - [Graphql Link and Headers] (#graphql-link-and-headers)
+    - [Graphql Link and Headers](#graphql-link-and-headers)
     - [Offline Cache](#offline-cache)
       - [Normalization](#normalization)
     - [Queries](#queries)
