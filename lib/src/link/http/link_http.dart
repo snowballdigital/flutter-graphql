@@ -69,7 +69,7 @@ class HttpLink extends Link {
               try {
                 // TODO: support multiple http methods
                 response = await fetcher.post(
-                  uri,
+                  Uri.parse(uri),
                   headers: httpHeaders,
                   body: httpOptionsAndBody.body,
                 );
