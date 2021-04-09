@@ -119,8 +119,7 @@ class QueryManager {
       ).first;
 
       // save the data from fetchResult to the cache
-      if (fetchResult.data != null &&
-          options.fetchPolicy != FetchPolicy.noCache) {
+      if (fetchResult.data != null && options.fetchPolicy != FetchPolicy.noCache) {
         cache.write(
           operation.toKey(),
           fetchResult.data,
@@ -138,10 +137,14 @@ class QueryManager {
 
       queryResult = _mapFetchResultToQueryResult(fetchResult);
     } catch (error) {
-      // TODO some dart errors break this
-      final GraphQLError graphQLError = GraphQLError(
-        message: error.message,
-      );
+      GraphQLError graphQLError;
+
+      try {
+        // TODO some dart errors break this
+        graphQLError = GraphQLError(message: error.message);
+      } catch (e) {
+        graphQLError = GraphQLError(message: 'An error has ocurred');
+      }
 
       if (queryResult != null) {
         queryResult.addError(graphQLError);
