@@ -1,6 +1,7 @@
-import 'package:graphql_parser/graphql_parser.dart';
+import 'package:collection/collection.dart' show IterableExtension;
+import 'package:graphql_parser2/graphql_parser2.dart';
 
-String getOperationName(String rawDoc) {
+String? getOperationName(String rawDoc) {
   final List<Token> tokens = scan(rawDoc);
   final Parser parser = Parser(tokens);
 
@@ -13,10 +14,9 @@ String getOperationName(String rawDoc) {
   final DocumentContext doc = parser.parseDocument();
 
   if (doc.definitions != null && doc.definitions.isNotEmpty) {
-    final OperationDefinitionContext definition = doc.definitions.lastWhere(
+    final OperationDefinitionContext? definition = doc.definitions.lastWhereOrNull(
       (DefinitionContext context) => context is OperationDefinitionContext,
-      orElse: () => null,
-    );
+    ) as OperationDefinitionContext?;
 
     if (definition != null) {
       if (definition.name != null) {

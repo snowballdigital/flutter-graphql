@@ -1,14 +1,11 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
-import 'package:flutter_graphql/src/core/query_manager.dart';
-import 'package:flutter_graphql/src/core/query_result.dart';
-import 'package:flutter_graphql/src/core/observable_query.dart';
-import 'package:flutter_graphql/src/core/query_options.dart';
-
-import 'package:flutter_graphql/src/link/link.dart';
 import 'package:flutter_graphql/src/cache/cache.dart';
+import 'package:flutter_graphql/src/core/observable_query.dart';
+import 'package:flutter_graphql/src/core/query_manager.dart';
+import 'package:flutter_graphql/src/core/query_options.dart';
+import 'package:flutter_graphql/src/core/query_result.dart';
+import 'package:flutter_graphql/src/link/link.dart';
 
 /// The link is a [Link] over which GraphQL documents will be resolved into a [FetchResult].
 /// The cache is the initial [Cache] to use in the data store.
@@ -19,12 +16,12 @@ class GraphQLClient {
   /// The initial [Cache] to use in the data store.
   final Cache cache;
 
-  QueryManager queryManager;
+  late QueryManager queryManager;
 
   /// Constructs a [GraphQLClient] given a [Link] and a [Cache].
   GraphQLClient({
-    @required this.link,
-    @required this.cache,
+    required this.link,
+    required this.cache,
   }) {
     queryManager = QueryManager(
       link: link,
@@ -40,13 +37,13 @@ class GraphQLClient {
 
   /// This resolves a single query according to the [QueryOptions] specified and
   /// returns a [Future] which resolves with the [QueryResult] or throws an [Exception].
-  Future<QueryResult> query(QueryOptions options) {
+  Future<QueryResult?> query(QueryOptions options) {
     return queryManager.query(options);
   }
 
   /// This resolves a single mutation according to the [MutationOptions] specified and
   /// returns a [Future] which resolves with the [QueryResult] or throws an [Exception].
-  Future<QueryResult> mutate(MutationOptions options) {
+  Future<QueryResult?> mutate(MutationOptions options) {
     return queryManager.mutate(options);
   }
 

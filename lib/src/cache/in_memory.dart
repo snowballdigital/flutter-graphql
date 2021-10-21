@@ -14,7 +14,7 @@ class InMemoryCache implements Cache {
   /// A directory to be used for storage.
   /// This is used for testing, on regular usage
   /// 'path_provider' will provide the storage directory.
-  final Directory customStorageDirectory;
+  final Directory? customStorageDirectory;
 
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
   bool _writingToStorage = false;
@@ -64,7 +64,7 @@ class InMemoryCache implements Cache {
   Future<String> get _localStoragePath async {
     if (customStorageDirectory != null) {
       // Used for testing
-      return customStorageDirectory.path;
+      return customStorageDirectory!.path;
     }
 
     final Directory directory = await getApplicationDocumentsDirectory();
@@ -139,7 +139,7 @@ class InMemoryCache implements Cache {
   }
 
   @override
-  Future<bool> remove(String key, bool cascade) {
+  Future<bool>? remove(String key, bool cascade) {
     // TODO: implement remove
     return null;
   }

@@ -1,26 +1,20 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
-import 'package:flutter_graphql/src/core/query_options.dart';
-import 'package:flutter_graphql/src/core/query_result.dart';
+import 'package:flutter_graphql/src/cache/cache.dart';
 import 'package:flutter_graphql/src/core/graphql_error.dart';
 import 'package:flutter_graphql/src/core/observable_query.dart';
-
-import 'package:flutter_graphql/src/scheduler/scheduler.dart';
-
+import 'package:flutter_graphql/src/core/query_options.dart';
+import 'package:flutter_graphql/src/core/query_result.dart';
+import 'package:flutter_graphql/src/link/fetch_result.dart';
 import 'package:flutter_graphql/src/link/link.dart';
 import 'package:flutter_graphql/src/link/operation.dart';
-import 'package:flutter_graphql/src/link/fetch_result.dart';
-
-import 'package:flutter_graphql/src/cache/cache.dart';
-
+import 'package:flutter_graphql/src/scheduler/scheduler.dart';
 import 'package:flutter_graphql/src/utilities/get_from_ast.dart';
 
 class QueryManager {
   QueryManager({
-    @required this.link,
-    @required this.cache,
+    required this.link,
+    required this.cache,
   }) {
     scheduler = QueryScheduler(
       queryManager: this,
@@ -30,7 +24,7 @@ class QueryManager {
   final Link link;
   final Cache cache;
 
-  QueryScheduler scheduler;
+  QueryScheduler? scheduler;
   int idCounter = 1;
   Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
 
@@ -51,22 +45,22 @@ class QueryManager {
     return observableQuery;
   }
 
-  Future<QueryResult> query(QueryOptions options) {
+  Future<QueryResult?> query(QueryOptions options) {
     return fetchQuery('0', options);
   }
 
-  Future<QueryResult> mutate(MutationOptions options) {
+  Future<QueryResult?> mutate(MutationOptions options) {
     return fetchQuery('0', options);
   }
 
-  Future<QueryResult> fetchQuery(
+  Future<QueryResult?> fetchQuery(
     String queryId,
     BaseOptions options,
   ) async {
-    final ObservableQuery observableQuery = getQuery(queryId);
+    final ObservableQuery? observableQuery = getQuery(queryId);
     // XXX there is a bug in the `graphql_parser` package, where this result might be
     // null event though the operation name is present in the document
-    final String operationName = getOperationName(options.document);
+    final String? operationName = getOperationName(options.document);
     // create a new operation to fetch
     final Operation operation = Operation(
       document: options.document,
@@ -75,11 +69,11 @@ class QueryManager {
     );
 
     FetchResult fetchResult;
-    QueryResult queryResult;
+    QueryResult? queryResult;
 
     try {
       if (options.context != null) {
-        operation.setContext(options.context);
+        operation.setContext(options.context!);
       }
 
       if (options.fetchPolicy == FetchPolicy.cacheFirst ||
@@ -141,7 +135,7 @@ class QueryManager {
 
       try {
         // TODO some dart errors break this
-        graphQLError = GraphQLError(message: error.message);
+        graphQLError = GraphQLError(message: error.toString());
       } catch (e) {
         graphQLError = GraphQLError(message: 'An error has ocurred');
       }
@@ -164,7 +158,7 @@ class QueryManager {
     return queryResult;
   }
 
-  ObservableQuery getQuery(String queryId) {
+  ObservableQuery? getQuery(String queryId) {
     if (queries.containsKey(queryId)) {
       return queries[queryId];
     }
@@ -192,10 +186,10 @@ class QueryManager {
   }
 
   QueryResult _mapFetchResultToQueryResult(FetchResult fetchResult) {
-    List<GraphQLError> errors;
+    List<GraphQLError>? errors;
 
     if (fetchResult.errors != null) {
-      errors = List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
+      errors = List<GraphQLError>.from(fetchResult.errors!.map<GraphQLError>(
         (dynamic rawError) => GraphQLError.fromJSON(rawError),
       ));
     }

@@ -1,16 +1,15 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter_graphql/flutter_graphql.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:flutter_graphql/flutter_graphql.dart';
-
-SocketClient socketClient;
+late SocketClient socketClient;
 
 class SocketClient {
   final Uuid _uuid = Uuid();
   final GraphQLSocket _socket;
-  static Map<String, String> _initPayload;
+  static Map<String, String>? _initPayload;
 
   SocketClient(this._socket) {
     _socket.connectionAck.listen(print);
@@ -27,7 +26,7 @@ class SocketClient {
     final Map<String, String> headers = const <String, String>{
       'content-type': 'application/json',
     },
-    final Map<String, String> initPayload,
+    final Map<String, String>? initPayload,
   }) async {
     _initPayload = initPayload;
 

@@ -6,10 +6,10 @@ class Location {
         column = data['column'];
 
   /// The line of the error in the query.
-  final int line;
+  final int? line;
 
   /// The column of the error in the query.
-  final int column;
+  final int? column;
 
   @override
   String toString() => '{ line: $line, column: $column }';
@@ -42,18 +42,18 @@ class GraphQLError {
   final dynamic data;
 
   /// The message of the error.
-  final String message;
+  final String? message;
 
   /// Locations where the error appear.
-  final List<Location> locations;
+  final List<Location>? locations;
 
   /// The path of the field in error.
-  final List<dynamic> path;
+  final List<dynamic>? path;
 
   /// Custom error data returned by your GraphQL API server
-  final Map<String, dynamic> extensions;
+  final Map<String, dynamic>? extensions;
 
   @override
   String toString() =>
-      '$message: ${locations is List ? locations.map((Location l) => '[${l.toString()}]').join('') : "Undefined location"}';
+      '$message: ${locations is List ? locations!.map((Location l) => '[${l.toString()}]').join('') : "Undefined location"}';
 }

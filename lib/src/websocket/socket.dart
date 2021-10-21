@@ -9,10 +9,10 @@ import '../../flutter_graphql.dart';
 class GraphQLSocket {
   GraphQLSocket(this._socket) {
     _socket
-        .map<Map<String, dynamic>>((dynamic message) => json.decode(message))
+        .map<Map<String, dynamic>?>((dynamic message) => json.decode(message))
         .listen(
-      (Map<String, dynamic> message) {
-        final String type = message['type'] ?? 'unknown';
+      (Map<String, dynamic>? message) {
+        final String type = message!['type'] ?? 'unknown';
         final dynamic payload = message['payload'] ?? <String, dynamic>{};
         final String id = message['id'] ?? 'none';
 
