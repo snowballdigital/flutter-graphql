@@ -4,10 +4,9 @@ import 'package:flutter_graphql/flutter_graphql.dart';
 import 'package:flutter_graphql/src/core/query_manager.dart';
 import 'package:flutter_graphql/src/core/query_result.dart';
 import 'package:flutter_graphql/src/scheduler/scheduler.dart';
-import 'package:meta/meta.dart';
 
 
-typedef void OnData(QueryResult result);
+typedef void OnData(QueryResult? result);
 
 enum QueryLifecycle {
   UNEXECUTED,
@@ -23,33 +22,33 @@ enum QueryLifecycle {
 
 class ObservableQuery {
   ObservableQuery({
-    @required this.queryManager,
-    @required this.options,
+    required this.queryManager,
+    required this.options,
   })  : queryId = queryManager.generateQueryId().toString(),
         scheduler = queryManager.scheduler {
-    controller = StreamController<QueryResult>.broadcast(
+    controller = StreamController<QueryResult?>.broadcast(
       onListen: onListen,
     );
   }
 
   final String queryId;
-  final QueryScheduler scheduler;
+  final QueryScheduler? scheduler;
   final QueryManager queryManager;
 
-  final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
+  final Set<StreamSubscription<QueryResult?>> _onDataSubscriptions =
       Set<StreamSubscription<QueryResult>>();
 
   QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
 
   WatchQueryOptions options;
 
-  StreamController<QueryResult> controller;
+  late StreamController<QueryResult?> controller;
 
-  Stream<QueryResult> get stream => controller.stream;
+  Stream<QueryResult?> get stream => controller.stream;
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.POLLING;
 
   void onListen() {
-    if (options.fetchResults) {
+    if (options.fetchResults!) {
       controller.add(
         QueryResult(
           loading: true,
@@ -82,18 +81,18 @@ class ObservableQuery {
   }
 
   // most mutation behavior happens here
-  void onData(Iterable<OnData> callbacks) {
+  void onData(Iterable<OnData?> callbacks) {
     if (callbacks != null && callbacks.isNotEmpty) {
-      StreamSubscription<QueryResult> subscription;
+      StreamSubscription<QueryResult?>? subscription;
 
-      subscription = stream.listen((QueryResult result) {
-        void handle(OnData callback) {
-          callback(result);
+      subscription = stream.listen((QueryResult? result) {
+        void handle(OnData? callback) {
+          callback!(result);
         }
 
-        if (!result.loading) {
+        if (!result!.loading!) {
           callbacks.forEach(handle);
-          subscription.cancel();
+          subscription!.cancel();
           _onDataSubscriptions.remove(subscription);
 
           if (_onDataSubscriptions.isEmpty) {
@@ -111,7 +110,7 @@ class ObservableQuery {
     }
   }
 
-  void startPolling(int pollInterval) {
+  void startPolling(int? pollInterval) {
     if (options.fetchPolicy == FetchPolicy.cacheFirst ||
         options.fetchPolicy == FetchPolicy.cacheOnly) {
       throw Exception(
@@ -120,17 +119,17 @@ class ObservableQuery {
     }
 
     if (isCurrentlyPolling) {
-      scheduler.stopPollingQuery(queryId);
+      scheduler!.stopPollingQuery(queryId);
     }
 
     options.pollInterval = pollInterval;
     lifecycle = QueryLifecycle.POLLING;
-    scheduler.startPollingQuery(options, queryId);
+    scheduler!.startPollingQuery(options, queryId);
   }
 
   void stopPolling() {
     if (isCurrentlyPolling) {
-      scheduler.stopPollingQuery(queryId);
+      scheduler!.stopPollingQuery(queryId);
       options.pollInterval = null;
       lifecycle = QueryLifecycle.POLLING_STOPPED;
     }
@@ -150,7 +149,7 @@ class ObservableQuery {
       queryManager.closeQuery(this, fromQuery: true);
     }
 
-    for (StreamSubscription<QueryResult> subscription in _onDataSubscriptions) {
+    for (StreamSubscription<QueryResult?> subscription in _onDataSubscriptions) {
       subscription.cancel();
     }
 

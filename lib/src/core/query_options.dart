@@ -1,5 +1,4 @@
 import 'package:flutter_graphql/src/graphql_client.dart';
-import 'package:meta/meta.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
 /// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
@@ -28,7 +27,7 @@ enum ErrorPolicy {
 /// Base options.
 class BaseOptions {
   BaseOptions({
-    @required this.document,
+    required this.document,
     this.variables,
     this.fetchPolicy,
     this.errorPolicy,
@@ -41,30 +40,30 @@ class BaseOptions {
 
   /// A map going from variable name to variable value, where the variables are used
   /// within the GraphQL query.
-  Map<String, dynamic> variables;
+  Map<String, dynamic>? variables;
 
   /// Specifies the [FetchPolicy] to be used.
-  FetchPolicy fetchPolicy;
+  FetchPolicy? fetchPolicy;
 
   /// Specifies the [ErrorPolicy] to be used.
-  ErrorPolicy errorPolicy;
+  ErrorPolicy? errorPolicy;
 
   /// Context to be passed to link execution chain.
-  Map<String, dynamic> context;
+  Map<String, dynamic>? context;
 
-  GraphQLClient client;
+  GraphQLClient? client;
 }
 
 /// Query options.
 class QueryOptions extends BaseOptions {
   QueryOptions({
-    @required String document,
-    Map<String, dynamic> variables,
-    FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
-    ErrorPolicy errorPolicy = ErrorPolicy.none,
+    required String document,
+    Map<String, dynamic>? variables,
+    FetchPolicy? fetchPolicy = FetchPolicy.cacheFirst,
+    ErrorPolicy? errorPolicy = ErrorPolicy.none,
     this.pollInterval,
-    Map<String, dynamic> context,
-    GraphQLClient client,
+    Map<String, dynamic>? context,
+    GraphQLClient? client,
   }) : super(
           document: document,
           variables: variables,
@@ -76,18 +75,18 @@ class QueryOptions extends BaseOptions {
 
   /// The time interval (in milliseconds) on which this query should be
   /// refetched from the server.
-  int pollInterval;
+  int? pollInterval;
 }
 
 /// Mutation options
 class MutationOptions extends BaseOptions {
   MutationOptions({
-    @required String document,
-    Map<String, dynamic> variables,
+    required String document,
+    Map<String, dynamic>? variables,
     FetchPolicy fetchPolicy = FetchPolicy.networkOnly,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
-    Map<String, dynamic> context,
-    GraphQLClient client
+    Map<String, dynamic>? context,
+    GraphQLClient? client
   }) : super(
           document: document,
           variables: variables,
@@ -101,14 +100,14 @@ class MutationOptions extends BaseOptions {
 // ObservableQuery options
 class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
-    @required String document,
-    Map<String, dynamic> variables,
-    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
-    ErrorPolicy errorPolicy = ErrorPolicy.none,
-    int pollInterval,
+    required String document,
+    Map<String, dynamic>? variables,
+    FetchPolicy? fetchPolicy = FetchPolicy.cacheAndNetwork,
+    ErrorPolicy? errorPolicy = ErrorPolicy.none,
+    int? pollInterval,
     this.fetchResults,
-    Map<String, dynamic> context,
-    GraphQLClient client,
+    Map<String, dynamic>? context,
+    GraphQLClient? client,
   }) : super(
           document: document,
           variables: variables,
@@ -120,7 +119,7 @@ class WatchQueryOptions extends QueryOptions {
         );
 
   /// Whether or not to fetch result.
-  bool fetchResults;
+  bool? fetchResults;
 
   /// Checks if the [WatchQueryOptions] in this class are equal to some given options.
   bool areEqualTo(WatchQueryOptions otherOptions) {
@@ -157,8 +156,8 @@ class WatchQueryOptions extends QueryOptions {
   }
 
   bool _areDifferentVariables(
-    Map<String, dynamic> a,
-    Map<String, dynamic> b,
+    Map<String, dynamic>? a,
+    Map<String, dynamic>? b,
   ) {
     if (a == null && b == null) {
       return false;

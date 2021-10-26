@@ -1,28 +1,27 @@
-import 'package:meta/meta.dart';
-import 'package:flutter_graphql/src/utilities/traverse.dart';
 import 'package:flutter_graphql/src/cache/in_memory.dart';
-typedef String DataIdFromObject(Object node);
+import 'package:flutter_graphql/src/utilities/traverse.dart';
+typedef String? DataIdFromObject(Object? node);
 
 class NormalizationException implements Exception {
   NormalizationException(this.cause, this.overflowError, this.value);
 
   StackOverflowError overflowError;
   String cause;
-  Object value;
+  Object? value;
 
   String get message => cause;
 }
 
 class NormalizedInMemoryCache extends InMemoryCache {
   NormalizedInMemoryCache({
-    @required this.dataIdFromObject,
+    required this.dataIdFromObject,
     String prefix = '@cache/reference',
   }) : _prefix = prefix;
 
   DataIdFromObject dataIdFromObject;
   String _prefix;
 
-  Object _dereference(Object node) {
+  Object? _dereference(Object? node) {
     if (node is List && node.length == 2 && node[0] == _prefix) {
       return read(node[1]);
     }
@@ -36,7 +35,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   */
   @override
   dynamic read(String key) {
-    final Object value = super.read(key);
+    final Object? value = super.read(key);
 
     try {
       return traverse(value, _dereference);
@@ -54,8 +53,8 @@ class NormalizedInMemoryCache extends InMemoryCache {
     }
   }
 
-  List<String> _normalize(Object node) {
-    final String dataId = dataIdFromObject(node);
+  List<String>? _normalize(Object? node) {
+    final String? dataId = dataIdFromObject(node);
 
     if (dataId != null) {
       write(dataId, node);
@@ -70,17 +69,17 @@ class NormalizedInMemoryCache extends InMemoryCache {
     replacing them with references
   */
   @override
-  void write(String key, Object value) {
-    final Object normalized = traverseValues(value, _normalize);
+  void write(String key, Object? value) {
+    final Object normalized = traverseValues(value as Map<String, Object>, _normalize);
     super.write(key, normalized);
   }
 }
 
-String typenameDataIdFromObject(Object object) {
+String? typenameDataIdFromObject(Object? object) {
   if (object is Map<String, Object> &&
       object.containsKey('__typename') &&
       object.containsKey('id')) {
-    return "${object['__typename']}/${object['id']}";
+    return '${object['__typename']}/${object['id']}';
   }
 
   return null;

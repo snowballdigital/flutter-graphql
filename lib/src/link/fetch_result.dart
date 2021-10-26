@@ -6,10 +6,10 @@ class FetchResult {
     this.context,
   });
 
-  List<dynamic> errors;
+  List<dynamic>? errors;
 
   /// List<dynamic> or Map<String, dynamic>
   dynamic data;
-  Map<String, dynamic> extensions;
-  Map<String, dynamic> context;
+  Map<String, dynamic>? extensions;
+  Map<String, dynamic>? context;
 }

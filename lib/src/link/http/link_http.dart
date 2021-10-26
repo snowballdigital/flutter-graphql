@@ -1,29 +1,30 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
+import 'package:flutter_graphql/src/link/fetch_result.dart';
+import 'package:flutter_graphql/src/link/http/fallback_http_config.dart';
+import 'package:flutter_graphql/src/link/http/http_config.dart';
+import 'package:flutter_graphql/src/link/link.dart';
+import 'package:flutter_graphql/src/link/operation.dart';
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
 
-import 'package:flutter_graphql/src/link/link.dart';
-import 'package:flutter_graphql/src/link/operation.dart';
-import 'package:flutter_graphql/src/link/fetch_result.dart';
-import 'package:flutter_graphql/src/link/http/http_config.dart';
-import 'package:flutter_graphql/src/link/http/fallback_http_config.dart';
-
 class HttpLink extends Link {
   HttpLink({
-    @required String uri,
-    bool includeExtensions,
-    Client fetch,
-    Map<String, String> headers,
-    Map<String, dynamic> credentials,
-    Map<String, dynamic> fetchOptions,
+    required String uri,
+    bool? includeExtensions,
+    Client? fetch,
+    Map<String, String>? headers,
+    Map<String, dynamic>? credentials,
+    Map<String, dynamic>? fetchOptions,
   }) : super(
           request: (
-            Operation operation, [
-            NextLink forward,
+            Operation? operation, [
+            NextLink? forward,
           ]) {
+            if (operation == null) {
+              throw ArgumentError('flutter_graphQl: var operation is null');
+            }
             final Client fetcher = fetch ?? Client();
 
             final HttpConfig linkConfig = HttpConfig(
@@ -35,8 +36,8 @@ class HttpLink extends Link {
               headers: headers,
             );
 
-            final Map<String, dynamic> context = operation.getContext();
-            HttpConfig contextConfig;
+            final Map<String, dynamic>? context = operation.getContext();
+            late HttpConfig contextConfig;
 
             if (context != null) {
               // TODO: refactor context to use a [HttpConfig] object to avoid dynamic types
@@ -50,18 +51,17 @@ class HttpLink extends Link {
               );
             }
 
-            final HttpOptionsAndBody httpOptionsAndBody =
-                _selectHttpOptionsAndBody(
+            final HttpOptionsAndBody httpOptionsAndBody = _selectHttpOptionsAndBody(
               operation,
               fallbackHttpConfig,
               linkConfig,
               contextConfig,
             );
 
-            final Map<String, dynamic> options = httpOptionsAndBody.options;
-            final Map<String, String> httpHeaders = options['headers'];
+            final Map<String, dynamic> options = httpOptionsAndBody.options!;
+            final Map<String, String>? httpHeaders = options['headers'];
 
-            StreamController<FetchResult> controller;
+            late StreamController<FetchResult> controller;
 
             Future<void> onListen() async {
               Response response;
@@ -97,10 +97,10 @@ class HttpLink extends Link {
 
 HttpOptionsAndBody _selectHttpOptionsAndBody(
   Operation operation,
-  HttpConfig fallbackConfig, [
+  HttpConfig fallbackConfig,
   HttpConfig linkConfig,
   HttpConfig contextConfig,
-]) {
+) {
   final Map<String, dynamic> options = <String, dynamic>{
     'headers': <String, String>{},
     'credentials': <String, dynamic>{},
@@ -110,31 +110,31 @@ HttpOptionsAndBody _selectHttpOptionsAndBody(
   // http options
 
   // initialze with fallback http options
-  http.addAll(fallbackConfig.http);
+  http.addAll(fallbackConfig.http!);
 
   // inject the configured http options
   if (linkConfig.http != null) {
-    http.addAll(linkConfig.http);
+    http.addAll(linkConfig.http!);
   }
 
   // override with context http options
   if (contextConfig.http != null) {
-    http.addAll(contextConfig.http);
+    http.addAll(contextConfig.http!);
   }
 
   // options
 
   // initialze with fallback options
-  options.addAll(fallbackConfig.options);
+  options.addAll(fallbackConfig.options!);
 
   // inject the configured options
   if (linkConfig.options != null) {
-    options.addAll(linkConfig.options);
+    options.addAll(linkConfig.options!);
   }
 
   // override with context options
   if (contextConfig.options != null) {
-    options.addAll(contextConfig.options);
+    options.addAll(contextConfig.options!);
   }
 
   // headers
@@ -174,11 +174,11 @@ HttpOptionsAndBody _selectHttpOptionsAndBody(
   };
 
   // not sending the query (i.e persisted queries)
-  if (http.includeExtensions) {
+  if (http.includeExtensions!) {
     body['extensions'] = operation.extensions;
   }
 
-  if (http.includeQuery) {
+  if (http.includeQuery!) {
     body['query'] = operation.document;
   }
 
@@ -190,7 +190,7 @@ HttpOptionsAndBody _selectHttpOptionsAndBody(
 
 FetchResult _parseResponse(Response response) {
   final int statusCode = response.statusCode;
-  final String reasonPhrase = response.reasonPhrase;
+  final String? reasonPhrase = response.reasonPhrase;
 
   if (statusCode < 200 || statusCode >= 400) {
     throw ClientException(
@@ -220,22 +220,21 @@ FetchResult _parseResponse(Response response) {
 /// The default fallback encoding is set to UTF-8 according to the IETF RFC4627 standard
 /// which specifies the application/json media type:
 ///   "JSON text SHALL be encoded in Unicode. The default encoding is UTF-8."
-Encoding _determineEncodingFromResponse(Response response,
-    [Encoding fallback = utf8]) {
-  final String contentType = response.headers['content-type'];
+Encoding _determineEncodingFromResponse(Response response, [Encoding fallback = utf8]) {
+  final String? contentType = response.headers['content-type'];
 
   if (contentType == null) {
     return fallback;
   }
 
   final MediaType mediaType = new MediaType.parse(contentType);
-  final String charset = mediaType.parameters['charset'];
+  final String? charset = mediaType.parameters['charset'];
 
   if (charset == null) {
     return fallback;
   }
 
-  final Encoding encoding = Encoding.getByName(charset);
+  final Encoding? encoding = Encoding.getByName(charset);
 
   return encoding == null ? fallback : encoding;
 }
