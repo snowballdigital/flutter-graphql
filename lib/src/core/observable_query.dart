@@ -4,7 +4,6 @@ import 'package:flutter_graphql/flutter_graphql.dart';
 import 'package:flutter_graphql/src/core/query_manager.dart';
 import 'package:flutter_graphql/src/core/query_result.dart';
 import 'package:flutter_graphql/src/scheduler/scheduler.dart';
-import 'package:meta/meta.dart';
 
 
 typedef void OnData(QueryResult? result);
