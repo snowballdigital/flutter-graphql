@@ -14,7 +14,7 @@ class HttpLink extends Link {
     required String uri,
     bool? includeExtensions,
     Client? fetch,
-    Map<String, dynamic>? headers,
+    Map<String, String>? headers,
     Map<String, dynamic>? credentials,
     Map<String, dynamic>? fetchOptions,
   }) : super(
@@ -140,16 +140,18 @@ HttpOptionsAndBody _selectHttpOptionsAndBody(
   // headers
 
   // initialze with fallback headers
-  options['headers'].addAll(fallbackConfig.headers);
+  if (fallbackConfig.headers != null) {
+    (options['headers'] as Map<String, String>).addAll(fallbackConfig.headers!);
+  }
 
   // inject the configured headers
   if (linkConfig.headers != null) {
-    options['headers'].addAll(linkConfig.headers);
+    (options['headers'] as Map<String, String>).addAll(linkConfig.headers!);
   }
 
   // inject the context headers
   if (contextConfig.headers != null) {
-    options['headers'].addAll(contextConfig.headers);
+    (options['headers'] as Map<String, String>).addAll(contextConfig.headers!);
   }
 
   // credentials

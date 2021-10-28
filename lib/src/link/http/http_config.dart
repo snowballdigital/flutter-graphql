@@ -29,7 +29,7 @@ class HttpConfig {
   HttpQueryOptions? http;
   Map<String, dynamic>? options;
   Map<String, dynamic>? credentials;
-  Map<String, dynamic>? headers;
+  Map<String, String>? headers;
 }
 
 class HttpOptionsAndBody {
