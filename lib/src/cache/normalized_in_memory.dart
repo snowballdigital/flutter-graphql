@@ -1,5 +1,6 @@
 import 'package:flutter_graphql/src/cache/in_memory.dart';
 import 'package:flutter_graphql/src/utilities/traverse.dart';
+
 typedef String? DataIdFromObject(Object? node);
 
 class NormalizationException implements Exception {
@@ -58,7 +59,10 @@ class NormalizedInMemoryCache extends InMemoryCache {
 
     if (dataId != null) {
       write(dataId, node);
-      return <String>[_prefix, dataId];
+      return <String>[
+        _prefix,
+        dataId
+      ];
     }
 
     return null;
@@ -70,15 +74,13 @@ class NormalizedInMemoryCache extends InMemoryCache {
   */
   @override
   void write(String key, Object? value) {
-    final Object normalized = traverseValues(value as Map<String, Object>, _normalize);
+    final Object normalized = traverseValues(Map.castFrom<String, dynamic, String, Object>(value as Map<String, dynamic>), _normalize);
     super.write(key, normalized);
   }
 }
 
 String? typenameDataIdFromObject(Object? object) {
-  if (object is Map<String, Object> &&
-      object.containsKey('__typename') &&
-      object.containsKey('id')) {
+  if (object is Map<String, Object> && object.containsKey('__typename') && object.containsKey('id')) {
     return '${object['__typename']}/${object['id']}';
   }
 
