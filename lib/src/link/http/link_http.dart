@@ -47,7 +47,7 @@ class HttpLink extends Link {
                 ),
                 options: context['fetchOptions'],
                 credentials: context['credentials'],
-                headers: context['headers'],
+                headers: (context['headers'] as Map<String, dynamic>).map((String key, dynamic value) => MapEntry<String, String>(key, value ?? '')),
               );
             }
 
