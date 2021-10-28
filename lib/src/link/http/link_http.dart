@@ -14,7 +14,7 @@ class HttpLink extends Link {
     required String uri,
     bool? includeExtensions,
     Client? fetch,
-    Map<String, String>? headers,
+    Map<String, dynamic>? headers,
     Map<String, dynamic>? credentials,
     Map<String, dynamic>? fetchOptions,
   }) : super(
