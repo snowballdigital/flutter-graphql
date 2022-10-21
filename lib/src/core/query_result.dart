@@ -10,21 +10,21 @@ class QueryResult {
 
   /// List<dynamic> or Map<String, dynamic>
   dynamic data;
-  List<GraphQLError> errors;
-  bool loading;
-  bool stale;
+  List<GraphQLError>? errors;
+  bool? loading;
+  bool? stale;
 
   bool get hasErrors {
     if (errors == null) {
       return false;
     }
 
-    return errors.isNotEmpty;
+    return errors!.isNotEmpty;
   }
 
   void addError(GraphQLError graphQLError) {
     if (errors != null) {
-      errors.add(graphQLError);
+      errors!.add(graphQLError);
     } else {
       errors = <GraphQLError>[graphQLError];
     }

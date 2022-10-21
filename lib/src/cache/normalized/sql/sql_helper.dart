@@ -15,7 +15,7 @@ class SqlHelper {
   static const String IDX_RECORDS_KEY = 'idx_records_key';
   static const String CREATE_KEY_INDEX = '''CREATE INDEX $IDX_RECORDS_KEY ON $TABLE_RECORDS ($COLUMN_KEY)''';
 
-  Database db;
+  Database? db;
 
   Future open() async {
     final databasesPath = await getDatabasesPath();
@@ -27,7 +27,7 @@ class SqlHelper {
   }
 
   Future close() async {
-    await db.close();
+    await db!.close();
   }
   
 }

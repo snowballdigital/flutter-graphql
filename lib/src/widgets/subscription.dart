@@ -8,7 +8,7 @@ import '../websocket/messages.dart';
 typedef OnSubscriptionCompleted = void Function();
 
 typedef SubscriptionBuilder = Widget Function({
-  bool loading,
+  bool? loading,
   dynamic payload,
   dynamic error,
 });
@@ -18,8 +18,8 @@ class Subscription extends StatefulWidget {
     this.operationName,
     this.query, {
     this.variables = const <String, dynamic>{},
-    final Key key,
-    @required this.builder,
+    final Key? key,
+    required this.builder,
     this.initial,
     this.onCompleted,
   }) : super(key: key);
@@ -28,7 +28,7 @@ class Subscription extends StatefulWidget {
   final String query;
   final dynamic variables;
   final SubscriptionBuilder builder;
-  final OnSubscriptionCompleted onCompleted;
+  final OnSubscriptionCompleted? onCompleted;
   final dynamic initial;
 
   @override
@@ -89,7 +89,7 @@ class _SubscriptionState extends State<Subscription> {
 
   void _onDone() {
     if (widget.onCompleted != null) {
-      widget.onCompleted();
+      widget.onCompleted!();
     }
   }
 

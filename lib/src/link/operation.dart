@@ -8,10 +8,10 @@ class Operation {
     this.extensions,
   });
 
-  final String document;
-  final Map<String, dynamic> variables;
-  final String operationName;
-  final Map<String, dynamic> extensions;
+  final String? document;
+  final Map<String, dynamic>? variables;
+  final String? operationName;
+  final Map<String, dynamic>? extensions;
 
   final Map<String, dynamic> _context = <String, dynamic>{};
 

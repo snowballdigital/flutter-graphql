@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter_graphql/src/link/fetch_result.dart';
 import 'package:flutter_graphql/src/link/link.dart';
 import 'package:flutter_graphql/src/link/operation.dart';
-import 'package:flutter_graphql/src/link/fetch_result.dart';
 
 typedef GetToken = Future<String> Function();
 
@@ -10,21 +10,24 @@ class AuthLink extends Link {
   AuthLink({
     this.getToken,
   }) : super(
-          request: (Operation operation, [NextLink forward]) {
-            StreamController<FetchResult> controller;
+          request: (Operation? operation, [NextLink? forward]) {
+            late StreamController<FetchResult> controller;
 
             Future<void> onListen() async {
               try {
-                final String token = await getToken();
+                final String token = await getToken!();
 
-                operation.setContext(<String, Map<String, String>>{
-                  'headers': <String, String>{'Authorization': token}
+                operation?.setContext(<String, Map<String, String>>{
+                  'headers': <String, String>{
+                    'Authorization': token
+                  }
                 });
               } catch (error) {
                 controller.addError(error);
               }
-
-              await controller.addStream(forward(operation));
+              if (forward != null && operation != null) {
+                await controller.addStream(forward(operation));
+              }
               await controller.close();
             }
 
@@ -34,5 +37,5 @@ class AuthLink extends Link {
           },
         );
 
-  GetToken getToken;
+  GetToken? getToken;
 }

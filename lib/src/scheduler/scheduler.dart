@@ -9,7 +9,7 @@ class QueryScheduler {
     this.queryManager,
   });
 
-  QueryManager queryManager;
+  QueryManager? queryManager;
 
   /// Map going from query ids to the [WatchQueryOptions] associated with those queries.
   Map<String, WatchQueryOptions> registeredQueries =
@@ -26,7 +26,7 @@ class QueryScheduler {
     Timer timer,
     Duration interval,
   ) {
-    intervalQueries[interval].retainWhere(
+    intervalQueries[interval]!.retainWhere(
       (String queryId) {
         // If ObservableQuery can't be found from registeredQueries or if it has a
         // different interval, it means that this queryId is no longer registered
@@ -41,7 +41,7 @@ class QueryScheduler {
         }
 
         final Duration pollInterval =
-            Duration(seconds: registeredQueries[queryId].pollInterval);
+            Duration(seconds: registeredQueries[queryId]!.pollInterval!);
 
         return registeredQueries.containsKey(queryId) &&
             pollInterval == interval;
@@ -49,7 +49,7 @@ class QueryScheduler {
     );
 
     // if no queries on the interval clean up
-    if (intervalQueries[interval].isEmpty) {
+    if (intervalQueries[interval]!.isEmpty) {
       intervalQueries.remove(interval);
       _pollingTimers.remove(interval);
       timer.cancel();
@@ -57,9 +57,9 @@ class QueryScheduler {
     }
 
     // fetch each query on the interval
-    for (String queryId in intervalQueries[interval]) {
-      final WatchQueryOptions options = registeredQueries[queryId];
-      queryManager.fetchQuery(queryId, options);
+    for (String queryId in intervalQueries[interval]!) {
+      final WatchQueryOptions options = registeredQueries[queryId]!;
+      queryManager!.fetchQuery(queryId, options);
     }
   }
 
@@ -70,11 +70,11 @@ class QueryScheduler {
     registeredQueries[queryId] = options;
 
     final Duration interval = Duration(
-      seconds: options.pollInterval,
+      seconds: options.pollInterval!,
     );
 
     if (intervalQueries.containsKey(interval)) {
-      intervalQueries[interval].add(queryId);
+      intervalQueries[interval]!.add(queryId);
     } else {
       intervalQueries[interval] = <String>[queryId];
 

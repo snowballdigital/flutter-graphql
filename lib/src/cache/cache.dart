@@ -1,5 +1,5 @@
 abstract class Cache {
-  Future<bool> remove(String key, bool cascade);
+  Future<bool>? remove(String key, bool cascade);
 
   dynamic read(String key) {}
 
