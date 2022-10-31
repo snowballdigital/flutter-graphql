@@ -1,3 +1,3 @@
-bool notNull(Object any) {
+bool notNull(Object? any) {
   return any != null;
 }

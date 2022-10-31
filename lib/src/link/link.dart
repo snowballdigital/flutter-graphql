@@ -8,22 +8,25 @@ typedef NextLink = Stream<FetchResult> Function(
 );
 
 typedef RequestHandler = Stream<FetchResult> Function(
-  Operation operation, [
-  NextLink forward,
+  Operation? operation, [
+  NextLink? forward,
 ]);
 
 Link _concat(
   Link first,
   Link second,
 ) {
-  return Link(request: (
-    Operation operation, [
-    NextLink forward,
-  ]) {
-    return first.request(operation, (Operation op) {
-      return second.request(op, forward);
-    });
-  });
+  return Link(
+      request: first.request == null || second.request == null
+          ? null
+          : (
+              Operation? operation, [
+              NextLink? forward,
+            ]) {
+              return first.request!(operation, (Operation op) {
+                return second.request!(op, forward);
+              });
+            });
 }
 
 class Link {
@@ -31,7 +34,7 @@ class Link {
     this.request,
   });
 
-  final RequestHandler request;
+  final RequestHandler? request;
 
   Link concat(Link next) {
     return _concat(this, next);
@@ -39,8 +42,8 @@ class Link {
 }
 
 Stream<FetchResult> execute({
-  Link link,
-  Operation operation,
+  required Link link,
+  Operation? operation,
 }) {
-  return link.request(operation);
+  return link.request!(operation);
 }

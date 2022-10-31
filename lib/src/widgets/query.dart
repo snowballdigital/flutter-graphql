@@ -7,15 +7,15 @@ import 'package:flutter_graphql/src/core/query_result.dart';
 
 import 'package:flutter_graphql/src/widgets/graphql_provider.dart';
 
-typedef QueryBuilder = Widget Function(QueryResult result);
+typedef QueryBuilder = Widget Function(QueryResult? result);
 
 /// Builds a [Query] widget based on the a given set of [QueryOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
 class Query extends StatefulWidget {
   const Query({
-    final Key key,
-    @required this.options,
-    @required this.builder,
+    final Key? key,
+    required this.options,
+    required this.builder,
   }) : super(key: key);
 
   final QueryOptions options;
@@ -26,38 +26,29 @@ class Query extends StatefulWidget {
 }
 
 class QueryState extends State<Query> {
-  ObservableQuery observableQuery;
+  ObservableQuery? observableQuery;
 
   WatchQueryOptions get _options {
-    FetchPolicy fetchPolicy = widget.options.fetchPolicy;
+    FetchPolicy? fetchPolicy = widget.options.fetchPolicy;
 
     if (fetchPolicy == FetchPolicy.cacheFirst) {
       fetchPolicy = FetchPolicy.cacheAndNetwork;
     }
 
-    return WatchQueryOptions(
-      document: widget.options.document,
-      variables: widget.options.variables,
-      fetchPolicy: fetchPolicy,
-      errorPolicy: widget.options.errorPolicy,
-      pollInterval: widget.options.pollInterval,
-      fetchResults: true,
-      context: widget.options.context,
-      client: widget.options.client
-    );
+    return WatchQueryOptions(document: widget.options.document, variables: widget.options.variables, fetchPolicy: fetchPolicy, errorPolicy: widget.options.errorPolicy, pollInterval: widget.options.pollInterval, fetchResults: true, context: widget.options.context, client: widget.options.client);
   }
 
   void _initQuery() {
-    GraphQLClient client;
+    GraphQLClient? client;
 
-    if (_options.client != null) 
-      client =_options.client;
+    if (_options.client != null)
+      client = _options.client;
     else
       client = GraphQLProvider.of(context).value;
     assert(client != null);
 
     observableQuery?.close();
-    observableQuery = client.watchQuery(_options);
+    observableQuery = client!.watchQuery(_options);
   }
 
   @override
@@ -71,7 +62,7 @@ class QueryState extends State<Query> {
     super.didUpdateWidget(oldWidget);
 
     // TODO @micimize - investigate why/if this was causing issues
-    if (!observableQuery.options.areEqualTo(_options)) {
+    if (!observableQuery!.options.areEqualTo(_options)) {
       _initQuery();
     }
   }
@@ -84,16 +75,16 @@ class QueryState extends State<Query> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QueryResult>(
+    return StreamBuilder<QueryResult?>(
       initialData: QueryResult(
         loading: true,
       ),
-      stream: observableQuery.stream,
+      stream: observableQuery!.stream,
       builder: (
         BuildContext buildContext,
-        AsyncSnapshot<QueryResult> snapshot,
+        AsyncSnapshot<QueryResult?> snapshot,
       ) {
-        return widget?.builder(snapshot.data);
+        return widget.builder(snapshot.data);
       },
     );
   }
